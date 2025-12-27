@@ -5,21 +5,30 @@ import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ForgotPasswordPage() {
+  const { resetPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setIsLoading(true);
 
-    // Simulação de envio mockado
-    setTimeout(() => {
-      setIsSent(true);
+    const { error } = await resetPassword(email);
+
+    if (error) {
+      setError(error.message);
       setIsLoading(false);
-    }, 1500);
+      return;
+    }
+
+    setIsSent(true);
+    setIsLoading(false);
   };
 
   if (isSent) {
@@ -71,6 +80,12 @@ export default function ForgotPasswordPage() {
           {/* Form */}
           <div className="bg-white rounded-2xl shadow-xl border border-neutral-medium/50 p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
+
               <div>
                 <label
                   htmlFor="email"
@@ -130,4 +145,3 @@ export default function ForgotPasswordPage() {
     </main>
   );
 }
-

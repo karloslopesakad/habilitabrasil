@@ -2,13 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { signIn, isLoading: authLoading } = useAuth();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -17,25 +21,33 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const planParam = searchParams.get("plano");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    // Simulação de login mockado
-    setTimeout(() => {
-      // Validação básica mockada
-      if (formData.email && formData.password) {
-        // Simula sucesso no login
-        console.log("Login mockado:", formData);
-        // Em produção, aqui salvaria o token/usuário
-        localStorage.setItem("user", JSON.stringify({ email: formData.email }));
-        router.push("/dashboard");
+    const { error } = await signIn(formData.email, formData.password);
+
+    if (error) {
+      if (error.message.includes("Invalid login credentials")) {
+        setError("E-mail ou senha incorretos");
+      } else if (error.message.includes("Email not confirmed")) {
+        setError("Por favor, confirme seu e-mail antes de fazer login");
       } else {
-        setError("Por favor, preencha todos os campos");
+        setError(error.message);
       }
       setIsLoading(false);
-    }, 1000);
+      return;
+    }
+
+    // Redirecionar para dashboard ou página do plano
+    if (planParam) {
+      router.push(`/dashboard?plano=${encodeURIComponent(planParam)}`);
+    } else {
+      router.push("/dashboard");
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,6 +73,11 @@ export default function LoginPage() {
             <p className="text-neutral-600">
               Acesse seu painel e acompanhe seu processo de habilitação
             </p>
+            {planParam && (
+              <p className="text-sm text-primary-blue mt-2">
+                Você selecionou o plano: <strong>{planParam}</strong>
+              </p>
+            )}
           </div>
 
           {/* Login Form */}
@@ -135,22 +152,8 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-primary-blue focus:ring-primary-blue border-neutral-medium rounded"
-                  />
-                  <label
-                    htmlFor="remember-me"
-                    className="ml-2 block text-sm text-neutral-600"
-                  >
-                    Lembrar-me
-                  </label>
-                </div>
+              {/* Forgot Password */}
+              <div className="flex items-center justify-end">
                 <Link
                   href="/esqueci-senha"
                   className="text-sm text-primary-blue hover:text-primary-deep font-medium"
@@ -162,10 +165,10 @@ export default function LoginPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || authLoading}
                 className="w-full bg-primary-blue text-white py-3 rounded-lg font-semibold hover:bg-primary-deep transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
-                {isLoading ? (
+                {isLoading || authLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>Entrando...</span>
@@ -196,7 +199,7 @@ export default function LoginPage() {
             {/* Register Link */}
             <div className="mt-6">
               <Link
-                href="/register"
+                href={planParam ? `/register?plano=${encodeURIComponent(planParam)}` : "/register"}
                 className="block w-full text-center bg-neutral-light text-primary-blue py-3 rounded-lg font-semibold border-2 border-primary-blue hover:bg-primary-blue/5 transition-all"
               >
                 Criar conta gratuita
@@ -218,4 +221,3 @@ export default function LoginPage() {
     </main>
   );
 }
-

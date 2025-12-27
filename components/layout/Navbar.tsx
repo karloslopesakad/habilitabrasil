@@ -1,25 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X, User } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Menu, X, User, LogOut } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const router = useRouter();
+  const { user, profile, signOut, isLoading } = useAuth();
 
-  useEffect(() => {
-    // Verifica se o usuário está logado (mockado)
-    const user = localStorage.getItem("user");
-    setIsLoggedIn(!!user);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    router.push("/");
+  const handleLogout = async () => {
+    await signOut();
   };
 
   return (
@@ -56,31 +47,29 @@ export default function Navbar() {
               Pacotes
             </Link>
             <Link
-              href="/assistente"
-              className="text-neutral-700 hover:text-primary-blue transition-colors font-medium"
-            >
-              Suporte
-            </Link>
-            <Link
               href="/faq"
               className="text-neutral-700 hover:text-primary-blue transition-colors font-medium"
             >
               FAQ
             </Link>
-            {isLoggedIn ? (
+            
+            {isLoading ? (
+              <div className="w-6 h-6 border-2 border-primary-blue border-t-transparent rounded-full animate-spin"></div>
+            ) : user ? (
               <>
                 <Link
                   href="/dashboard"
                   className="text-neutral-700 hover:text-primary-blue transition-colors font-medium flex items-center space-x-1"
                 >
                   <User className="w-4 h-4" />
-                  <span>Painel</span>
+                  <span>{profile?.name || "Painel"}</span>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-neutral-700 hover:text-primary-blue transition-colors font-medium"
+                  className="text-neutral-700 hover:text-primary-blue transition-colors font-medium flex items-center space-x-1"
                 >
-                  Sair
+                  <LogOut className="w-4 h-4" />
+                  <span>Sair</span>
                 </button>
               </>
             ) : (
@@ -140,20 +129,16 @@ export default function Navbar() {
               Pacotes
             </Link>
             <Link
-              href="/assistente"
-              className="block text-neutral-700 hover:text-primary-blue transition-colors font-medium"
-              onClick={() => setIsOpen(false)}
-            >
-              Suporte
-            </Link>
-            <Link
               href="/faq"
               className="block text-neutral-700 hover:text-primary-blue transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
               FAQ
             </Link>
-            {isLoggedIn ? (
+            
+            {isLoading ? (
+              <div className="w-6 h-6 border-2 border-primary-blue border-t-transparent rounded-full animate-spin"></div>
+            ) : user ? (
               <>
                 <Link
                   href="/dashboard"
@@ -196,4 +181,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

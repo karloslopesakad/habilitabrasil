@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import {
@@ -15,9 +15,13 @@ import {
   UserPlus,
   CheckCircle,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { signUp, isLoading: authLoading } = useAuth();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -31,6 +35,8 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  const planParam = searchParams.get("plano");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,39 +62,27 @@ export default function RegisterPage() {
       return;
     }
 
-    // Simulação de registro mockado
-    setTimeout(() => {
-      if (
-        formData.name &&
-        formData.email &&
-        formData.phone &&
-        formData.password
-      ) {
-        // Simula sucesso no registro
-        console.log("Registro mockado:", formData);
-        // Em produção, aqui salvaria o usuário
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-          })
-        );
-        setSuccess(true);
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 2000);
+    const { error } = await signUp(
+      formData.email,
+      formData.password,
+      formData.name,
+      formData.phone
+    );
+
+    if (error) {
+      if (error.message.includes("User already registered")) {
+        setError("Este e-mail já está cadastrado");
       } else {
-        setError("Por favor, preencha todos os campos");
-        setIsLoading(false);
+        setError(error.message);
       }
-    }, 1000);
+      setIsLoading(false);
+      return;
+    }
+
+    setSuccess(true);
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
@@ -109,12 +103,16 @@ export default function RegisterPage() {
               <h2 className="text-2xl font-display font-bold text-primary-deep mb-2">
                 Conta criada com sucesso!
               </h2>
-              <p className="text-neutral-600 mb-4">
-                Redirecionando para seu painel...
+              <p className="text-neutral-600 mb-6">
+                Enviamos um e-mail de confirmação para <strong>{formData.email}</strong>.
+                Por favor, verifique sua caixa de entrada e confirme seu cadastro.
               </p>
-              <div className="w-full bg-neutral-light rounded-full h-2">
-                <div className="bg-success-DEFAULT h-2 rounded-full animate-pulse" style={{ width: "100%" }}></div>
-              </div>
+              <Link
+                href="/login"
+                className="inline-block bg-primary-blue text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-deep transition-all"
+              >
+                Ir para o Login
+              </Link>
             </div>
           </div>
         </div>
@@ -139,6 +137,11 @@ export default function RegisterPage() {
             <p className="text-neutral-600">
               Comece sua jornada para obter a CNH
             </p>
+            {planParam && (
+              <p className="text-sm text-primary-blue mt-2">
+                Você selecionou o plano: <strong>{planParam}</strong>
+              </p>
+            )}
           </div>
 
           {/* Register Form */}
@@ -290,9 +293,7 @@ export default function RegisterPage() {
                   />
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   >
                     {showConfirmPassword ? (
@@ -338,10 +339,10 @@ export default function RegisterPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || authLoading}
                 className="w-full bg-primary-blue text-white py-3 rounded-lg font-semibold hover:bg-primary-deep transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
-                {isLoading ? (
+                {isLoading || authLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>Criando conta...</span>
@@ -372,7 +373,7 @@ export default function RegisterPage() {
             {/* Login Link */}
             <div className="mt-6">
               <Link
-                href="/login"
+                href={planParam ? `/login?plano=${encodeURIComponent(planParam)}` : "/login"}
                 className="block w-full text-center bg-neutral-light text-primary-blue py-3 rounded-lg font-semibold border-2 border-primary-blue hover:bg-primary-blue/5 transition-all"
               >
                 Fazer login
@@ -394,4 +395,3 @@ export default function RegisterPage() {
     </main>
   );
 }
-
