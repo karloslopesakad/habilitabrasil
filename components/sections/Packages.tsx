@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Star } from "lucide-react";
-import Link from "next/link";
+import PlanButton from "@/components/ui/PlanButton";
 
 interface Package {
   name: string;
@@ -148,16 +148,16 @@ export default function Packages() {
                 ))}
               </ul>
 
-              <Link
-                href="/assistente"
-                className={`block w-full text-center py-3 rounded-lg font-semibold transition-all ${
+              <PlanButton
+                planName={pkg.name}
+                className={`block w-full text-center py-3 rounded-lg font-semibold transition-all cursor-pointer ${
                   pkg.popular
                     ? "bg-primary-blue text-white hover:bg-primary-deep shadow-md hover:shadow-lg"
                     : "bg-neutral-light text-primary-blue hover:bg-primary-blue/10 border border-primary-blue"
                 }`}
               >
                 Escolher plano
-              </Link>
+              </PlanButton>
             </div>
           ))}
         </div>

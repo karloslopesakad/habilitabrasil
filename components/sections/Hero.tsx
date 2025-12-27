@@ -13,23 +13,28 @@ export default function Hero() {
             <div className="inline-flex items-center space-x-2 bg-primary-blue/10 text-primary-blue px-4 py-2 rounded-full mb-6">
               <Sparkles className="w-4 h-4" />
               <span className="text-sm font-semibold">
-                Instrutores Especializados
+                Plataforma de Apoio para CNH
               </span>
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary-deep mb-6 leading-tight">
-              Seu caminho para a{" "}
-              <span className="text-primary-blue">CNH começa aqui</span>
+              Receba instruções para todo seu processo de{" "}
+              <span className="text-primary-blue">habilitação</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-neutral-600 mb-8 leading-relaxed">
-              Entenda as novas regras e conquiste sua habilitação com apoio
-              completo
+            <p className="text-xl md:text-2xl text-neutral-700 mb-4 leading-relaxed font-medium">
+              Através de instrutores especializados que acompanham você em cada etapa
+            </p>
+
+            <p className="text-lg md:text-xl text-neutral-600 mb-8 leading-relaxed">
+              Está com dificuldades de entender como se habilitar? Nós te ajudamos! 
+              Conheça nossos planos de auxílio e conquiste sua CNH com orientação completa, 
+              desde a documentação até a prova prática.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
               <Link
-                href="/#pacotes"
+                href="/pacotes"
                 className="group bg-primary-blue text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-deep transition-all shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
               >
                 <span>Começar agora</span>
@@ -74,21 +79,42 @@ export default function Hero() {
 
                 <div className="space-y-3">
                   <div className="bg-neutral-light rounded-lg p-4">
-                    <p className="text-sm text-neutral-700">
-                      Nossos instrutores especializados estão prontos para acompanhar você em cada etapa do processo de habilitação.
+                    <p className="text-sm font-semibold text-primary-deep mb-2">
+                      O que oferecemos:
                     </p>
+                    <ul className="text-sm text-neutral-700 space-y-1.5">
+                      <li className="flex items-start space-x-2">
+                        <span className="text-primary-blue mt-0.5">•</span>
+                        <span>Orientação passo a passo em todas as etapas</span>
+                      </li>
+                      <li className="flex items-start space-x-2">
+                        <span className="text-primary-blue mt-0.5">•</span>
+                        <span>Auxílio com documentação e burocracias</span>
+                      </li>
+                      <li className="flex items-start space-x-2">
+                        <span className="text-primary-blue mt-0.5">•</span>
+                        <span>Aulas preparatórias e simulados</span>
+                      </li>
+                      <li className="flex items-start space-x-2">
+                        <span className="text-primary-blue mt-0.5">•</span>
+                        <span>Acompanhamento personalizado</span>
+                      </li>
+                    </ul>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <button className="bg-primary-blue/10 text-primary-blue px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-blue/20 transition-colors">
-                      Novas regras
-                    </button>
-                    <button className="bg-primary-blue/10 text-primary-blue px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-blue/20 transition-colors">
-                      Documentos
-                    </button>
-                    <button className="bg-primary-blue/10 text-primary-blue px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-blue/20 transition-colors">
-                      Custos
-                    </button>
+                    <Link
+                      href="/como-funciona"
+                      className="bg-primary-blue/10 text-primary-blue px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-blue/20 transition-colors"
+                    >
+                      Como funciona
+                    </Link>
+                    <Link
+                      href="/pacotes"
+                      className="bg-primary-blue/10 text-primary-blue px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-blue/20 transition-colors"
+                    >
+                      Ver planos
+                    </Link>
                   </div>
                 </div>
               </div>
