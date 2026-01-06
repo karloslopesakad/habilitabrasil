@@ -15,6 +15,7 @@ export default function NovoInstrutorPage() {
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
+    user_id: null as string | null,
     name: "",
     phone: "",
     whatsapp: "",

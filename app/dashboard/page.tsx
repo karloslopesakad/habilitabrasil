@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -21,7 +21,7 @@ import { useTheoreticalClasses, useUserClassRegistrations } from "@/hooks/useThe
 import { useUserPracticalClasses, useInstructors } from "@/hooks/usePracticalClasses";
 import { ProgressStatus, VehicleType } from "@/types/database";
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const planParam = searchParams.get("plano");
@@ -429,5 +429,26 @@ export default function DashboardPage() {
       </div>
       <Footer />
     </main>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-neutral-light">
+          <Navbar />
+          <div className="pt-24 pb-16 flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-primary-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-neutral-600">Carregando...</p>
+            </div>
+          </div>
+          <Footer />
+        </main>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   );
 }

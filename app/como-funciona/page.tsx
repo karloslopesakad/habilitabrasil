@@ -3,10 +3,7 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PlanButton from "@/components/ui/PlanButton";
-<<<<<<< HEAD
 import { usePackages } from "@/hooks/usePackages";
-=======
->>>>>>> 102b20a57758a4bd3ce6ac61eb952cfb95c9129c
 import {
   UserPlus,
   ClipboardList,
@@ -77,82 +74,6 @@ const platformSteps = [
       "Com toda a preparação e acompanhamento, você estará pronto para conquistar sua Carteira Nacional de Habilitação.",
     icon: GraduationCap,
     highlight: "Objetivo alcançado",
-<<<<<<< HEAD
-=======
-  },
-];
-
-const plans = [
-  {
-    name: "Free",
-    price: "Grátis",
-    description: "Plataforma com passo a passo completo",
-    features: [
-      "Passo a passo detalhado",
-      "Etapas do processo explicadas",
-      "Links de apoio oficiais",
-      "Acesso à plataforma",
-    ],
-  },
-  {
-    name: "Básico",
-    price: "R$ 97",
-    description: "Tudo do Free + consultoria e suporte",
-    features: [
-      "Tudo do pacote Free",
-      "Consultoria pela plataforma",
-      "Auxílio com documentação",
-      "Acesso a aulas gravadas",
-      "Suporte por chat",
-    ],
-  },
-  {
-    name: "B2",
-    price: "R$ 197",
-    description: "Preparação completa para prova teórica",
-    popular: true,
-    features: [
-      "Tudo do pacote Básico",
-      "1 aula agendada para prova teórica",
-      "Simulado interativo",
-      "1 aula de reforço",
-      "Material de estudo exclusivo",
-    ],
-  },
-  {
-    name: "Driver",
-    price: "R$ 497",
-    description: "Inclui aulas práticas obrigatórias",
-    features: [
-      "Tudo do pacote B2",
-      "2 aulas práticas obrigatórias",
-      "Instrutor qualificado",
-      "Acompanhamento personalizado",
-    ],
-  },
-  {
-    name: "Driver +10",
-    price: "R$ 997",
-    description: "Pacote completo com aulas extras",
-    features: [
-      "Tudo do pacote B2",
-      "8 aulas práticas de direção",
-      "Preparação intensiva",
-      "Garantia de aprovação*",
-    ],
-  },
-  {
-    name: "Driver Auto",
-    price: "R$ 597",
-    description: "Aulas práticas em carro automático",
-    highlight: "Diferencial",
-    features: [
-      "Tudo do pacote B2",
-      "Aulas em veículo automático",
-      "Instrutor especializado",
-      "Ideal para iniciantes",
-    ],
->>>>>>> 102b20a57758a4bd3ce6ac61eb952cfb95c9129c
   },
 ];
 
@@ -264,7 +185,6 @@ export default function ComoFunciona() {
               </p>
             </div>
 
-<<<<<<< HEAD
             {isLoading ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3].map((i) => (
@@ -343,69 +263,6 @@ export default function ComoFunciona() {
                 ))}
               </div>
             )}
-=======
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {plans.map((plan, index) => (
-                <div
-                  key={index}
-                  className={`bg-white rounded-xl p-6 border-2 transition-all hover:shadow-xl ${
-                    plan.popular
-                      ? "border-primary-blue shadow-lg lg:scale-105"
-                      : "border-neutral-medium/50 hover:border-primary-blue/50"
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="flex items-center justify-center mb-4">
-                      <span className="bg-primary-blue text-white px-4 py-1 rounded-full text-sm font-semibold">
-                        Mais Popular
-                      </span>
-                    </div>
-                  )}
-
-                  {plan.highlight && (
-                    <div className="flex items-center justify-center mb-4">
-                      <span className="bg-accent-teal text-white px-4 py-1 rounded-full text-sm font-semibold">
-                        {plan.highlight}
-                      </span>
-                    </div>
-                  )}
-
-                  <h3 className="text-2xl font-bold text-primary-deep mb-2">
-                    {plan.name}
-                  </h3>
-                  <div className="mb-4">
-                    <span className="text-3xl font-bold text-primary-blue">
-                      {plan.price}
-                    </span>
-                    {plan.price !== "Grátis" && (
-                      <span className="text-neutral-600 ml-2">/único</span>
-                    )}
-                  </div>
-                  <p className="text-neutral-600 mb-6">{plan.description}</p>
-
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start space-x-2">
-                        <CheckCircle className="w-5 h-5 text-success-DEFAULT flex-shrink-0 mt-0.5" />
-                        <span className="text-neutral-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <PlanButton
-                    planName={plan.name}
-                    className={`block w-full text-center py-3 rounded-lg font-semibold transition-all cursor-pointer ${
-                      plan.popular
-                        ? "bg-primary-blue text-white hover:bg-primary-deep shadow-md hover:shadow-lg"
-                        : "bg-neutral-light text-primary-blue hover:bg-primary-blue/10 border border-primary-blue"
-                    }`}
-                  >
-                    Escolher plano
-                  </PlanButton>
-                </div>
-              ))}
-            </div>
->>>>>>> 102b20a57758a4bd3ce6ac61eb952cfb95c9129c
 
             <p className="text-center text-sm text-neutral-500 mt-8">
               *Garantia de aprovação sujeita aos termos e condições. Consulte

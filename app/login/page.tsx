@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
@@ -8,7 +8,7 @@ import Footer from "@/components/layout/Footer";
 import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signIn, isLoading: authLoading } = useAuth();
@@ -219,5 +219,26 @@ export default function LoginPage() {
       </div>
       <Footer />
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-neutral-light">
+          <Navbar />
+          <div className="pt-24 pb-16 flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-primary-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-neutral-600">Carregando...</p>
+            </div>
+          </div>
+          <Footer />
+        </main>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
