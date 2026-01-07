@@ -139,6 +139,30 @@ export function useUserPracticalClasses(userId: string | undefined) {
       return { data: newClass, error: null };
     }
 
+    // Validação de limites será feita pelo trigger no banco
+    // Mas podemos fazer uma validação prévia para melhor UX
+    const { data: userPackage } = await supabase
+      .from("user_packages")
+      .select("*, package:packages(*)")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (userPackage) {
+      const durationHours = (data.duration_minutes || 50) / 60;
+      const hoursAvailable =
+        (userPackage.package?.practical_hours || 0) -
+        (userPackage.practical_hours_used || 0);
+
+      if (hoursAvailable < durationHours) {
+        return {
+          error: new Error(
+            `Você não tem horas suficientes no seu pacote. Disponíveis: ${hoursAvailable.toFixed(2)}h, Necessárias: ${durationHours.toFixed(2)}h`
+          ),
+        };
+      }
+    }
+
     const { data: newClass, error } = await supabase
       .from("practical_classes")
       .insert({

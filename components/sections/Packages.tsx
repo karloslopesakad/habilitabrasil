@@ -117,6 +117,7 @@ export default function Packages() {
 
                 <PlanButton
                   planName={pkg.name}
+                  packageId={pkg.id}
                   className={`w-full py-3 rounded-lg font-semibold transition-all ${
                     pkg.is_highlighted
                       ? "bg-primary-blue text-white hover:bg-primary-deep shadow-lg hover:shadow-xl"

@@ -204,6 +204,26 @@ CREATE TABLE settings (
 );
 
 -- ===========================================
+-- Tabela de Pagamentos
+-- ===========================================
+CREATE TABLE payments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  package_id UUID REFERENCES packages(id),
+  stripe_payment_intent_id VARCHAR(255),
+  stripe_checkout_session_id VARCHAR(255),
+  amount DECIMAL(10,2) NOT NULL,
+  currency VARCHAR(3) DEFAULT 'BRL',
+  status VARCHAR(50) NOT NULL, -- succeeded, pending, failed, refunded
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Adicionar coluna stripe_price_id na tabela packages (opcional)
+ALTER TABLE packages ADD COLUMN IF NOT EXISTS stripe_price_id VARCHAR(255);
+
+-- ===========================================
 -- Índices para Performance
 -- ===========================================
 CREATE INDEX idx_steps_order ON steps(display_order);
@@ -217,6 +237,10 @@ CREATE INDEX idx_practical_classes_user ON practical_classes(user_id);
 CREATE INDEX idx_practical_classes_instructor ON practical_classes(instructor_id);
 CREATE INDEX idx_packages_active ON packages(is_active);
 CREATE INDEX idx_packages_order ON packages(display_order);
+CREATE INDEX idx_payments_user ON payments(user_id);
+CREATE INDEX idx_payments_package ON payments(package_id);
+CREATE INDEX idx_payments_status ON payments(status);
+CREATE INDEX idx_payments_stripe_session ON payments(stripe_checkout_session_id);
 
 -- ===========================================
 -- Trigger para Atualizar updated_at
@@ -235,6 +259,7 @@ CREATE TRIGGER update_steps_updated_at BEFORE UPDATE ON steps FOR EACH ROW EXECU
 CREATE TRIGGER update_user_progress_updated_at BEFORE UPDATE ON user_progress FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER update_practical_classes_updated_at BEFORE UPDATE ON practical_classes FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER update_instructors_updated_at BEFORE UPDATE ON instructors FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ===========================================
 -- Row Level Security (RLS)
@@ -251,6 +276,7 @@ ALTER TABLE user_packages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE class_registrations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: usuário vê/edita apenas o próprio
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
@@ -310,4 +336,175 @@ CREATE POLICY "Admins can manage settings" ON settings FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
 CREATE POLICY "Settings are publicly viewable" ON settings FOR SELECT USING (true);
+
+-- Payments: usuário vê apenas os próprios, admins veem todos
+CREATE POLICY "Users can view own payments" ON payments FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Admins can manage payments" ON payments FOR ALL USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+);
+
+-- ===========================================
+-- Funções e Triggers para Contadores de Aulas
+-- ===========================================
+
+-- Função para incrementar horas práticas usadas
+CREATE OR REPLACE FUNCTION increment_practical_hours()
+RETURNS TRIGGER AS $$
+DECLARE
+  hours_to_add DECIMAL(10,2);
+BEGIN
+  -- Se status mudou para 'completed' e antes não era 'completed'
+  IF NEW.status = 'completed' AND (OLD.status IS NULL OR OLD.status != 'completed') THEN
+    -- Converter minutos para horas (arredondar para 2 casas decimais)
+    hours_to_add := ROUND(NEW.duration_minutes::DECIMAL / 60.0, 2);
+    
+    -- Atualizar user_packages
+    UPDATE user_packages
+    SET practical_hours_used = practical_hours_used + hours_to_add
+    WHERE user_id = NEW.user_id
+      AND status = 'active'
+      AND (expires_at IS NULL OR expires_at > NOW());
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_increment_practical_hours
+  AFTER UPDATE ON practical_classes
+  FOR EACH ROW
+  WHEN (NEW.status = 'completed' AND (OLD.status IS NULL OR OLD.status != 'completed'))
+  EXECUTE FUNCTION increment_practical_hours();
+
+-- Função para incrementar aulas teóricas usadas
+CREATE OR REPLACE FUNCTION increment_theoretical_classes()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Se attended mudou de false para true
+  IF NEW.attended = true AND (OLD.attended IS NULL OR OLD.attended = false) THEN
+    -- Incrementar contador
+    UPDATE user_packages
+    SET theoretical_classes_used = theoretical_classes_used + 1
+    WHERE user_id = NEW.user_id
+      AND status = 'active'
+      AND (expires_at IS NULL OR expires_at > NOW());
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_increment_theoretical_classes
+  AFTER UPDATE ON class_registrations
+  FOR EACH ROW
+  WHEN (NEW.attended = true AND (OLD.attended IS NULL OR OLD.attended = false))
+  EXECUTE FUNCTION increment_theoretical_classes();
+
+-- Função para validar limites antes de agendar aula prática
+CREATE OR REPLACE FUNCTION validate_practical_class_limits()
+RETURNS TRIGGER AS $$
+DECLARE
+  user_pkg RECORD;
+  hours_available DECIMAL(10,2);
+  hours_needed DECIMAL(10,2);
+BEGIN
+  -- Buscar pacote ativo do usuário
+  SELECT 
+    p.practical_hours,
+    up.practical_hours_used,
+    up.status,
+    up.expires_at
+  INTO user_pkg
+  FROM user_packages up
+  JOIN packages p ON p.id = up.package_id
+  WHERE up.user_id = NEW.user_id
+    AND up.status = 'active'
+    AND (up.expires_at IS NULL OR up.expires_at > NOW())
+  ORDER BY up.purchased_at DESC
+  LIMIT 1;
+  
+  -- Se não tem pacote ativo, verificar se requer pagamento
+  IF user_pkg IS NULL THEN
+    -- Verificar se a etapa requer pagamento
+    IF EXISTS (
+      SELECT 1 FROM steps s 
+      WHERE s.id = NEW.step_id 
+      AND s.requires_payment = true
+    ) THEN
+      RAISE EXCEPTION 'Este tipo de aula requer um pacote ativo. Por favor, adquira um pacote primeiro.';
+    END IF;
+    RETURN NEW;
+  END IF;
+  
+  -- Calcular horas disponíveis
+  hours_available := (user_pkg.practical_hours::DECIMAL - COALESCE(user_pkg.practical_hours_used, 0));
+  hours_needed := ROUND(NEW.duration_minutes::DECIMAL / 60.0, 2);
+  
+  -- Verificar se há horas suficientes
+  IF hours_available < hours_needed THEN
+    RAISE EXCEPTION 'Você não tem horas suficientes no seu pacote. Disponíveis: % horas, Necessárias: % horas', 
+      hours_available, hours_needed;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_validate_practical_class_limits
+  BEFORE INSERT ON practical_classes
+  FOR EACH ROW
+  EXECUTE FUNCTION validate_practical_class_limits();
+
+-- Função para validar limites antes de se inscrever em aula teórica
+CREATE OR REPLACE FUNCTION validate_theoretical_class_limits()
+RETURNS TRIGGER AS $$
+DECLARE
+  user_pkg RECORD;
+  classes_available INTEGER;
+BEGIN
+  -- Buscar pacote ativo do usuário
+  SELECT 
+    p.theoretical_classes_included,
+    up.theoretical_classes_used,
+    up.status,
+    up.expires_at
+  INTO user_pkg
+  FROM user_packages up
+  JOIN packages p ON p.id = up.package_id
+  WHERE up.user_id = NEW.user_id
+    AND up.status = 'active'
+    AND (up.expires_at IS NULL OR up.expires_at > NOW())
+  ORDER BY up.purchased_at DESC
+  LIMIT 1;
+  
+  -- Se não tem pacote ativo, verificar se requer pagamento
+  IF user_pkg IS NULL THEN
+    -- Verificar se a etapa requer pagamento
+    IF EXISTS (
+      SELECT 1 FROM theoretical_classes tc
+      JOIN steps s ON s.id = tc.step_id
+      WHERE tc.id = NEW.theoretical_class_id
+      AND s.requires_payment = true
+    ) THEN
+      RAISE EXCEPTION 'Este tipo de aula requer um pacote ativo. Por favor, adquira um pacote primeiro.';
+    END IF;
+    RETURN NEW;
+  END IF;
+  
+  -- Calcular aulas disponíveis
+  classes_available := (user_pkg.theoretical_classes_included - COALESCE(user_pkg.theoretical_classes_used, 0));
+  
+  -- Verificar se há aulas suficientes
+  IF classes_available <= 0 THEN
+    RAISE EXCEPTION 'Você não tem aulas teóricas disponíveis no seu pacote.';
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_validate_theoretical_class_limits
+  BEFORE INSERT ON class_registrations
+  FOR EACH ROW
+  EXECUTE FUNCTION validate_theoretical_class_limits();
 

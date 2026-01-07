@@ -206,6 +206,29 @@ export function useUserClassRegistrations(userId: string | undefined) {
       return { data: newReg, error: null };
     }
 
+    // Validação de limites será feita pelo trigger no banco
+    // Mas podemos fazer uma validação prévia para melhor UX
+    const { data: userPackage } = await supabase
+      .from("user_packages")
+      .select("*, package:packages(*)")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (userPackage) {
+      const classesAvailable =
+        (userPackage.package?.theoretical_classes_included || 0) -
+        (userPackage.theoretical_classes_used || 0);
+
+      if (classesAvailable <= 0) {
+        return {
+          error: new Error(
+            "Você não tem aulas teóricas disponíveis no seu pacote."
+          ),
+        };
+      }
+    }
+
     const { data, error } = await supabase
       .from("class_registrations")
       .insert({

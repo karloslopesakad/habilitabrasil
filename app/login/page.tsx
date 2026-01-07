@@ -22,6 +22,7 @@ function LoginContent() {
   const [error, setError] = useState("");
 
   const planParam = searchParams.get("plano");
+  const redirectParam = searchParams.get("redirect");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,8 +43,10 @@ function LoginContent() {
       return;
     }
 
-    // Redirecionar para dashboard ou página do plano
-    if (planParam) {
+    // Redirecionar: priorizar redirect, depois plano, depois dashboard
+    if (redirectParam) {
+      router.push(decodeURIComponent(redirectParam));
+    } else if (planParam) {
       router.push(`/dashboard?plano=${encodeURIComponent(planParam)}`);
     } else {
       router.push("/dashboard");

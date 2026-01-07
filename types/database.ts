@@ -166,6 +166,23 @@ export interface Setting {
   updated_at: string;
 }
 
+export interface Payment {
+  id: string;
+  user_id: string;
+  package_id: string;
+  stripe_payment_intent_id: string | null;
+  stripe_checkout_session_id: string | null;
+  amount: number;
+  currency: string;
+  status: 'succeeded' | 'pending' | 'failed' | 'refunded';
+  metadata: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  // Relacionamentos
+  user?: Profile;
+  package?: Package;
+}
+
 // ===========================================
 // Types para Formulários
 // ===========================================

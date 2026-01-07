@@ -251,6 +251,7 @@ export default function ComoFunciona() {
 
                     <PlanButton
                       planName={pkg.name}
+                      packageId={pkg.id}
                       className={`block w-full text-center py-3 rounded-lg font-semibold transition-all cursor-pointer ${
                         pkg.is_highlighted
                           ? "bg-primary-blue text-white hover:bg-primary-deep shadow-md hover:shadow-lg"

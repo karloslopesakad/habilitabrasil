@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  CreditCard,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -48,6 +49,11 @@ const menuItems = [
     name: "Instrutores",
     href: "/admin/instrutores",
     icon: Users,
+  },
+  {
+    name: "Pagamentos",
+    href: "/admin/pagamentos",
+    icon: CreditCard,
   },
   {
     name: "Configurações",

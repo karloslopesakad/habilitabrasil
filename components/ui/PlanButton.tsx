@@ -1,43 +1,49 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PlanButtonProps {
   children: React.ReactNode;
   className?: string;
   planName?: string;
+  packageId?: string;
 }
 
-export default function PlanButton({ children, className, planName }: PlanButtonProps) {
+export default function PlanButton({
+  children,
+  className,
+  planName,
+  packageId,
+}: PlanButtonProps) {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    setIsLoggedIn(!!user);
-  }, []);
+  const { user, isLoading } = useAuth();
 
   const handleClick = () => {
-    if (isLoggedIn) {
-      // Se logado, vai para o dashboard com o plano selecionado
-      if (planName) {
+    if (isLoading) return;
+
+    if (!user) {
+      // Se não logado, vai para o login com redirect
+      const redirectUrl = packageId
+        ? `/checkout?package_id=${packageId}`
+        : planName
+        ? `/dashboard?plano=${encodeURIComponent(planName)}`
+        : "/dashboard";
+      router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
+    } else {
+      // Se logado, vai para checkout (se tiver packageId) ou dashboard
+      if (packageId) {
+        router.push(`/checkout?package_id=${packageId}`);
+      } else if (planName) {
         router.push(`/dashboard?plano=${encodeURIComponent(planName)}`);
       } else {
         router.push("/dashboard");
-      }
-    } else {
-      // Se não logado, vai para o login
-      if (planName) {
-        router.push(`/login?plano=${encodeURIComponent(planName)}`);
-      } else {
-        router.push("/login");
       }
     }
   };
 
   return (
-    <button onClick={handleClick} className={className}>
+    <button onClick={handleClick} className={className} disabled={isLoading}>
       {children}
     </button>
   );
