@@ -38,21 +38,21 @@ export default function EtapasPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-primary-deep">Etapas do Processo</h2>
-          <p className="text-neutral-600">Gerencie as etapas que os candidatos devem seguir</p>
+          <p className="text-neutral-600 text-sm sm:text-base">Gerencie as etapas que os candidatos devem seguir</p>
         </div>
         <Link
           href="/admin/etapas/nova"
-          className="inline-flex items-center space-x-2 bg-primary-blue text-white px-4 py-2 rounded-lg hover:bg-primary-deep transition-colors"
+          className="inline-flex items-center justify-center space-x-2 bg-primary-blue text-white px-4 py-2 rounded-lg hover:bg-primary-deep transition-colors w-full sm:w-auto"
         >
           <Plus className="w-5 h-5" />
           <span>Nova Etapa</span>
         </Link>
       </div>
 
-      {/* Table */}
+      {/* Table - Desktop / Cards - Mobile */}
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
@@ -71,108 +71,185 @@ export default function EtapasPage() {
             </Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-neutral-50 border-b border-neutral-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                    Ordem
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                    Título
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                    Tipo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                    Requer Pagamento
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-200">
-                {steps.map((step) => {
-                  const typeConfig = stepTypeConfig[step.type];
-                  const Icon = typeConfig.icon;
-                  return (
-                    <tr key={step.id} className="hover:bg-neutral-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center justify-center w-8 h-8 bg-primary-blue text-white rounded-full text-sm font-semibold">
+          <>
+            {/* Mobile Cards */}
+            <div className="block md:hidden divide-y divide-neutral-200">
+              {steps.map((step) => {
+                const typeConfig = stepTypeConfig[step.type];
+                const Icon = typeConfig.icon;
+                return (
+                  <div key={step.id} className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <span className="inline-flex items-center justify-center w-8 h-8 bg-primary-blue text-white rounded-full text-sm font-semibold flex-shrink-0">
                           {step.display_order}
                         </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <p className="font-medium text-primary-deep">{step.title}</p>
                           {step.subtitle && (
-                            <p className="text-sm text-neutral-500">{step.subtitle}</p>
+                            <p className="text-sm text-neutral-500 mt-1">{step.subtitle}</p>
                           )}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${typeConfig.color}`}
+                      </div>
+                      <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
+                        <Link
+                          href={`/admin/etapas/${step.id}`}
+                          className="p-2 text-neutral-600 hover:text-primary-blue hover:bg-neutral-100 rounded-lg transition-colors"
                         >
-                          <Icon className="w-4 h-4" />
-                          <span>{typeConfig.label}</span>
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                          <Pencil className="w-4 h-4" />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(step.id)}
+                          disabled={deleting === step.id}
+                          className="p-2 text-neutral-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                          {deleting === step.id ? (
+                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 mt-3">
+                      <span
+                        className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${typeConfig.color}`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span>{typeConfig.label}</span>
+                      </span>
+                      <span className="text-sm text-neutral-600">
                         {step.requires_payment ? (
                           <span className="inline-flex items-center space-x-1 text-amber-600">
                             <Check className="w-4 h-4" />
-                            <span className="text-sm">Sim</span>
+                            <span>Requer Pagamento</span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center space-x-1 text-neutral-400">
                             <X className="w-4 h-4" />
-                            <span className="text-sm">Não</span>
+                            <span>Grátis</span>
                           </span>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {step.is_active ? (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Ativo
+                      </span>
+                      {step.is_active ? (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Ativo
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600">
+                          Inativo
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-neutral-50 border-b border-neutral-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Ordem
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Título
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Tipo
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Requer Pagamento
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {steps.map((step) => {
+                    const typeConfig = stepTypeConfig[step.type];
+                    const Icon = typeConfig.icon;
+                    return (
+                      <tr key={step.id} className="hover:bg-neutral-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center justify-center w-8 h-8 bg-primary-blue text-white rounded-full text-sm font-semibold">
+                            {step.display_order}
                           </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600">
-                            Inativo
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <div className="flex items-center justify-end space-x-2">
-                          <Link
-                            href={`/admin/etapas/${step.id}`}
-                            className="p-2 text-neutral-600 hover:text-primary-blue hover:bg-neutral-100 rounded-lg transition-colors"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(step.id)}
-                            disabled={deleting === step.id}
-                            className="p-2 text-neutral-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            {deleting === step.id ? (
-                              <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="font-medium text-primary-deep">{step.title}</p>
+                            {step.subtitle && (
+                              <p className="text-sm text-neutral-500">{step.subtitle}</p>
                             )}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${typeConfig.color}`}
+                          >
+                            <Icon className="w-4 h-4" />
+                            <span>{typeConfig.label}</span>
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {step.requires_payment ? (
+                            <span className="inline-flex items-center space-x-1 text-amber-600">
+                              <Check className="w-4 h-4" />
+                              <span className="text-sm">Sim</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center space-x-1 text-neutral-400">
+                              <X className="w-4 h-4" />
+                              <span className="text-sm">Não</span>
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {step.is_active ? (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Ativo
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600">
+                              Inativo
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <Link
+                              href={`/admin/etapas/${step.id}`}
+                              className="p-2 text-neutral-600 hover:text-primary-blue hover:bg-neutral-100 rounded-lg transition-colors"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(step.id)}
+                              disabled={deleting === step.id}
+                              className="p-2 text-neutral-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                              {deleting === step.id ? (
+                                <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>
