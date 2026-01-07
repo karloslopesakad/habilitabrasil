@@ -50,9 +50,16 @@ NEXT_PUBLIC_WHATSAPP_MESSAGE=Olá! Preciso de ajuda com meu processo de habilita
 
 ### 3. Criar tabelas no Supabase
 
+**Opção A: Instalação completa (banco novo)**
 1. Acesse o **SQL Editor** no painel do Supabase
 2. Execute o conteúdo do arquivo `supabase/schema.sql`
-3. Execute o conteúdo do arquivo `supabase/seed.sql` para inserir dados iniciais
+
+**Opção B: Migração incremental (banco existente)**
+1. Acesse o **SQL Editor** no painel do Supabase
+2. Execute o conteúdo do arquivo `supabase/setup-payments.sql` para adicionar suporte a pagamentos
+   - Este script é idempotente e pode ser executado múltiplas vezes sem problemas
+   - Inclui verificações automáticas ao final
+3. Execute o conteúdo do arquivo `supabase/seed.sql` para inserir dados iniciais (opcional)
 
 ### 4. Criar usuário admin
 

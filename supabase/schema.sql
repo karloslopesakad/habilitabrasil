@@ -4,24 +4,44 @@
 -- ===========================================
 
 -- Enum para tipos de etapas
-CREATE TYPE step_type AS ENUM ('link', 'theoretical_class', 'simulation', 'practical');
+DO $$ BEGIN
+  CREATE TYPE step_type AS ENUM ('link', 'theoretical_class', 'simulation', 'practical');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 -- Enum para status de progresso
-CREATE TYPE progress_status AS ENUM ('not_started', 'in_progress', 'completed');
+DO $$ BEGIN
+  CREATE TYPE progress_status AS ENUM ('not_started', 'in_progress', 'completed');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 -- Enum para status de pacote do usuário
-CREATE TYPE package_status AS ENUM ('active', 'expired', 'cancelled');
+DO $$ BEGIN
+  CREATE TYPE package_status AS ENUM ('active', 'expired', 'cancelled');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 -- Enum para tipo de veículo
-CREATE TYPE vehicle_type AS ENUM ('manual', 'automatic');
+DO $$ BEGIN
+  CREATE TYPE vehicle_type AS ENUM ('manual', 'automatic');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 -- Enum para status de aula
-CREATE TYPE class_status AS ENUM ('scheduled', 'completed', 'cancelled', 'no_show');
+DO $$ BEGIN
+  CREATE TYPE class_status AS ENUM ('scheduled', 'completed', 'cancelled', 'no_show');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 -- ===========================================
 -- Tabela de Perfis (extensão do auth.users)
 -- ===========================================
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   name VARCHAR(200),
   phone VARCHAR(20),
@@ -41,6 +61,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
@@ -48,7 +69,7 @@ CREATE TRIGGER on_auth_user_created
 -- ===========================================
 -- Tabela de Pacotes
 -- ===========================================
-CREATE TABLE packages (
+CREATE TABLE IF NOT EXISTS packages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(100) NOT NULL,
   slug VARCHAR(100) UNIQUE NOT NULL,
@@ -71,7 +92,7 @@ CREATE TABLE packages (
 -- ===========================================
 -- Tabela de Etapas
 -- ===========================================
-CREATE TABLE steps (
+CREATE TABLE IF NOT EXISTS steps (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   type step_type NOT NULL,
   title VARCHAR(200) NOT NULL,
@@ -92,7 +113,7 @@ CREATE TABLE steps (
 -- ===========================================
 -- Tabela de Instrutores
 -- ===========================================
-CREATE TABLE instructors (
+CREATE TABLE IF NOT EXISTS instructors (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id),
   name VARCHAR(200) NOT NULL,
@@ -111,7 +132,7 @@ CREATE TABLE instructors (
 -- ===========================================
 -- Tabela de Aulas Teóricas
 -- ===========================================
-CREATE TABLE theoretical_classes (
+CREATE TABLE IF NOT EXISTS theoretical_classes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   step_id UUID REFERENCES steps(id) ON DELETE CASCADE,
   instructor_id UUID REFERENCES instructors(id),
@@ -130,7 +151,7 @@ CREATE TABLE theoretical_classes (
 -- ===========================================
 -- Tabela de Aulas Práticas
 -- ===========================================
-CREATE TABLE practical_classes (
+CREATE TABLE IF NOT EXISTS practical_classes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   step_id UUID REFERENCES steps(id) ON DELETE CASCADE,
   instructor_id UUID REFERENCES instructors(id),
@@ -148,7 +169,7 @@ CREATE TABLE practical_classes (
 -- ===========================================
 -- Tabela de Pacotes do Usuário
 -- ===========================================
-CREATE TABLE user_packages (
+CREATE TABLE IF NOT EXISTS user_packages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   package_id UUID REFERENCES packages(id),
@@ -165,7 +186,7 @@ CREATE TABLE user_packages (
 -- ===========================================
 -- Tabela de Progresso do Usuário
 -- ===========================================
-CREATE TABLE user_progress (
+CREATE TABLE IF NOT EXISTS user_progress (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   step_id UUID REFERENCES steps(id) ON DELETE CASCADE,
@@ -181,7 +202,7 @@ CREATE TABLE user_progress (
 -- ===========================================
 -- Tabela de Inscrições em Aulas Teóricas
 -- ===========================================
-CREATE TABLE class_registrations (
+CREATE TABLE IF NOT EXISTS class_registrations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   theoretical_class_id UUID REFERENCES theoretical_classes(id) ON DELETE CASCADE,
@@ -195,7 +216,7 @@ CREATE TABLE class_registrations (
 -- ===========================================
 -- Tabela de Configurações
 -- ===========================================
-CREATE TABLE settings (
+CREATE TABLE IF NOT EXISTS settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   key VARCHAR(100) UNIQUE NOT NULL,
   value JSONB NOT NULL,
@@ -206,7 +227,7 @@ CREATE TABLE settings (
 -- ===========================================
 -- Tabela de Pagamentos
 -- ===========================================
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   package_id UUID REFERENCES packages(id),
@@ -217,7 +238,8 @@ CREATE TABLE payments (
   status VARCHAR(50) NOT NULL, -- succeeded, pending, failed, refunded
   metadata JSONB DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT payments_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
 
 -- Adicionar coluna stripe_price_id na tabela packages (opcional)
@@ -226,21 +248,22 @@ ALTER TABLE packages ADD COLUMN IF NOT EXISTS stripe_price_id VARCHAR(255);
 -- ===========================================
 -- Índices para Performance
 -- ===========================================
-CREATE INDEX idx_steps_order ON steps(display_order);
-CREATE INDEX idx_steps_type ON steps(type);
-CREATE INDEX idx_steps_active ON steps(is_active);
-CREATE INDEX idx_user_progress_user ON user_progress(user_id);
-CREATE INDEX idx_user_packages_user ON user_packages(user_id);
-CREATE INDEX idx_user_packages_status ON user_packages(status);
-CREATE INDEX idx_theoretical_classes_date ON theoretical_classes(scheduled_at);
-CREATE INDEX idx_practical_classes_user ON practical_classes(user_id);
-CREATE INDEX idx_practical_classes_instructor ON practical_classes(instructor_id);
-CREATE INDEX idx_packages_active ON packages(is_active);
-CREATE INDEX idx_packages_order ON packages(display_order);
-CREATE INDEX idx_payments_user ON payments(user_id);
-CREATE INDEX idx_payments_package ON payments(package_id);
-CREATE INDEX idx_payments_status ON payments(status);
-CREATE INDEX idx_payments_stripe_session ON payments(stripe_checkout_session_id);
+CREATE INDEX IF NOT EXISTS idx_steps_order ON steps(display_order);
+CREATE INDEX IF NOT EXISTS idx_steps_type ON steps(type);
+CREATE INDEX IF NOT EXISTS idx_steps_active ON steps(is_active);
+CREATE INDEX IF NOT EXISTS idx_user_progress_user ON user_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_packages_user ON user_packages(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_packages_status ON user_packages(status);
+CREATE INDEX IF NOT EXISTS idx_theoretical_classes_date ON theoretical_classes(scheduled_at);
+CREATE INDEX IF NOT EXISTS idx_practical_classes_user ON practical_classes(user_id);
+CREATE INDEX IF NOT EXISTS idx_practical_classes_instructor ON practical_classes(instructor_id);
+CREATE INDEX IF NOT EXISTS idx_packages_active ON packages(is_active);
+CREATE INDEX IF NOT EXISTS idx_packages_order ON packages(display_order);
+CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_package ON payments(package_id);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
+CREATE INDEX IF NOT EXISTS idx_payments_stripe_session ON payments(stripe_checkout_session_id);
+CREATE INDEX IF NOT EXISTS idx_payments_stripe_intent ON payments(stripe_payment_intent_id);
 
 -- ===========================================
 -- Trigger para Atualizar updated_at
@@ -253,12 +276,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_packages_updated_at ON packages;
 CREATE TRIGGER update_packages_updated_at BEFORE UPDATE ON packages FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_steps_updated_at ON steps;
 CREATE TRIGGER update_steps_updated_at BEFORE UPDATE ON steps FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_user_progress_updated_at ON user_progress;
 CREATE TRIGGER update_user_progress_updated_at BEFORE UPDATE ON user_progress FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_practical_classes_updated_at ON practical_classes;
 CREATE TRIGGER update_practical_classes_updated_at BEFORE UPDATE ON practical_classes FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_instructors_updated_at ON instructors;
 CREATE TRIGGER update_instructors_updated_at BEFORE UPDATE ON instructors FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS update_payments_updated_at ON payments;
 CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ===========================================
@@ -279,66 +309,91 @@ ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: usuário vê/edita apenas o próprio
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Packages: público pode ver ativos
+DROP POLICY IF EXISTS "Packages are publicly viewable" ON packages;
 CREATE POLICY "Packages are publicly viewable" ON packages FOR SELECT USING (is_active = true);
+DROP POLICY IF EXISTS "Admins can manage packages" ON packages;
 CREATE POLICY "Admins can manage packages" ON packages FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
 
 -- Steps: público pode ver ativos
+DROP POLICY IF EXISTS "Steps are publicly viewable" ON steps;
 CREATE POLICY "Steps are publicly viewable" ON steps FOR SELECT USING (is_active = true);
+DROP POLICY IF EXISTS "Admins can manage steps" ON steps;
 CREATE POLICY "Admins can manage steps" ON steps FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
 
 -- Instructors: público pode ver ativos
+DROP POLICY IF EXISTS "Instructors are publicly viewable" ON instructors;
 CREATE POLICY "Instructors are publicly viewable" ON instructors FOR SELECT USING (is_active = true);
+DROP POLICY IF EXISTS "Admins can manage instructors" ON instructors;
 CREATE POLICY "Admins can manage instructors" ON instructors FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
 
 -- Theoretical Classes: público pode ver ativas
+DROP POLICY IF EXISTS "Theoretical classes are publicly viewable" ON theoretical_classes;
 CREATE POLICY "Theoretical classes are publicly viewable" ON theoretical_classes FOR SELECT USING (is_active = true);
+DROP POLICY IF EXISTS "Admins can manage theoretical classes" ON theoretical_classes;
 CREATE POLICY "Admins can manage theoretical classes" ON theoretical_classes FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
 
 -- Practical Classes: usuário vê apenas as próprias
+DROP POLICY IF EXISTS "Users can view own practical classes" ON practical_classes;
 CREATE POLICY "Users can view own practical classes" ON practical_classes FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can insert own practical classes" ON practical_classes;
 CREATE POLICY "Users can insert own practical classes" ON practical_classes FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Admins can manage practical classes" ON practical_classes;
 CREATE POLICY "Admins can manage practical classes" ON practical_classes FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
+DROP POLICY IF EXISTS "Instructors can view assigned classes" ON practical_classes;
 CREATE POLICY "Instructors can view assigned classes" ON practical_classes FOR SELECT USING (
   EXISTS (SELECT 1 FROM instructors WHERE user_id = auth.uid() AND id = practical_classes.instructor_id)
 );
 
 -- User Packages: usuário vê apenas os próprios
+DROP POLICY IF EXISTS "Users can view own packages" ON user_packages;
 CREATE POLICY "Users can view own packages" ON user_packages FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can insert own packages" ON user_packages;
 CREATE POLICY "Users can insert own packages" ON user_packages FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Admins can manage user packages" ON user_packages;
 CREATE POLICY "Admins can manage user packages" ON user_packages FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
 
 -- User Progress: usuário vê/edita apenas o próprio
+DROP POLICY IF EXISTS "Users can view own progress" ON user_progress;
 CREATE POLICY "Users can view own progress" ON user_progress FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can manage own progress" ON user_progress;
 CREATE POLICY "Users can manage own progress" ON user_progress FOR ALL USING (auth.uid() = user_id);
 
 -- Class Registrations: usuário vê/gerencia apenas as próprias
+DROP POLICY IF EXISTS "Users can view own registrations" ON class_registrations;
 CREATE POLICY "Users can view own registrations" ON class_registrations FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can manage own registrations" ON class_registrations;
 CREATE POLICY "Users can manage own registrations" ON class_registrations FOR ALL USING (auth.uid() = user_id);
 
 -- Settings: apenas admins
+DROP POLICY IF EXISTS "Admins can manage settings" ON settings;
 CREATE POLICY "Admins can manage settings" ON settings FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
+DROP POLICY IF EXISTS "Settings are publicly viewable" ON settings;
 CREATE POLICY "Settings are publicly viewable" ON settings FOR SELECT USING (true);
 
 -- Payments: usuário vê apenas os próprios, admins veem todos
+DROP POLICY IF EXISTS "Users can view own payments" ON payments;
 CREATE POLICY "Users can view own payments" ON payments FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Admins can manage payments" ON payments;
 CREATE POLICY "Admins can manage payments" ON payments FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
@@ -394,6 +449,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_increment_theoretical_classes ON class_registrations;
 CREATE TRIGGER trigger_increment_theoretical_classes
   AFTER UPDATE ON class_registrations
   FOR EACH ROW
@@ -450,6 +506,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_validate_practical_class_limits ON practical_classes;
 CREATE TRIGGER trigger_validate_practical_class_limits
   BEFORE INSERT ON practical_classes
   FOR EACH ROW
@@ -503,8 +560,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_validate_theoretical_class_limits ON class_registrations;
 CREATE TRIGGER trigger_validate_theoretical_class_limits
   BEFORE INSERT ON class_registrations
   FOR EACH ROW
   EXECUTE FUNCTION validate_theoretical_class_limits();
 
+-- ===========================================
+-- FIM DO SCHEMA
+-- ===========================================

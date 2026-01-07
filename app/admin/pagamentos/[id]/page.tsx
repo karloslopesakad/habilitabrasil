@@ -47,16 +47,34 @@ function PaymentDetailContent() {
     }
 
     try {
-      const { data, error } = await supabase
+      // Buscar pagamento
+      const { data: paymentData, error: paymentError } = await supabase
         .from("payments")
-        .select("*, package:packages(*), user:profiles(*)")
+        .select("*, package:packages(*)")
         .eq("id", paymentId)
         .single();
 
-      if (error) {
-        setError(error.message);
+      if (paymentError) {
+        setError(paymentError.message);
+        setIsLoading(false);
+        return;
+      }
+
+      // Buscar profile do usuário
+      let userData = null;
+      if (paymentData?.user_id) {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", paymentData.user_id)
+          .single();
+        userData = profileData;
+      }
+
+      if (paymentData) {
+        setPayment({ ...paymentData, user: userData });
       } else {
-        setPayment(data);
+        setError("Pagamento não encontrado");
       }
     } catch (err: any) {
       setError(err.message);
@@ -229,14 +247,8 @@ function PaymentDetailContent() {
               </p>
             </div>
             <div>
-              <p className="text-sm text-neutral-600">Email</p>
-              <p className="font-medium text-primary-deep">
-                {user?.email || payment.user_id}
-              </p>
-            </div>
-            <div>
               <p className="text-sm text-neutral-600">ID do Usuário</p>
-              <p className="font-mono text-sm text-neutral-500">
+              <p className="font-mono text-sm text-primary-deep">
                 {payment.user_id}
               </p>
             </div>

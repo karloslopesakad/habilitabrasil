@@ -48,9 +48,10 @@ export default function PagamentosPage() {
     }
 
     try {
+      // Buscar pagamentos
       let query = supabase
         .from("payments")
-        .select("*, package:packages(*), user:profiles(*)")
+        .select("*, package:packages(*)")
         .order("created_at", { ascending: sortOrder === "asc" });
 
       if (statusFilter !== "all") {
@@ -64,6 +65,26 @@ export default function PagamentosPage() {
       } else {
         let filteredData = data || [];
 
+        // Buscar profiles para cada pagamento
+        if (filteredData.length > 0) {
+          const userIds = [...new Set(filteredData.map((p: Payment) => p.user_id))];
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select("id, name")
+            .in("id", userIds);
+
+          // Criar mapa de profiles
+          const profilesMap = new Map(
+            (profilesData || []).map((p: any) => [p.id, p])
+          );
+
+          // Adicionar profile a cada pagamento
+          filteredData = filteredData.map((payment: Payment) => ({
+            ...payment,
+            user: profilesMap.get(payment.user_id) || null,
+          }));
+        }
+
         // Filtrar por busca
         if (searchTerm) {
           filteredData = filteredData.filter((payment: Payment) => {
@@ -72,9 +93,9 @@ export default function PagamentosPage() {
             const searchLower = searchTerm.toLowerCase();
             return (
               user?.name?.toLowerCase().includes(searchLower) ||
-              user?.email?.toLowerCase().includes(searchLower) ||
               pkg?.name?.toLowerCase().includes(searchLower) ||
-              payment.stripe_checkout_session_id?.toLowerCase().includes(searchLower)
+              payment.stripe_checkout_session_id?.toLowerCase().includes(searchLower) ||
+              payment.user_id?.toLowerCase().includes(searchLower)
             );
           });
         }
@@ -275,8 +296,8 @@ export default function PagamentosPage() {
                           <p className="font-medium text-primary-deep">
                             {user?.name || "N/A"}
                           </p>
-                          <p className="text-sm text-neutral-500">
-                            {user?.email || payment.user_id}
+                          <p className="text-sm text-neutral-500 font-mono">
+                            {payment.user_id}
                           </p>
                         </div>
                       </td>
