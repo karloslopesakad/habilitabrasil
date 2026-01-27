@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
@@ -14,8 +14,12 @@ import {
   Phone,
   UserPlus,
   CheckCircle,
+  MapPin,
+  ChevronDown,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
+import { State } from "@/types/database";
 
 function RegisterContent() {
   const router = useRouter();
@@ -28,6 +32,7 @@ function RegisterContent() {
     phone: "",
     password: "",
     confirmPassword: "",
+    stateId: "",
     acceptTerms: false,
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -35,8 +40,41 @@ function RegisterContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [states, setStates] = useState<State[]>([]);
+  const [loadingStates, setLoadingStates] = useState(true);
 
   const planParam = searchParams.get("plano");
+
+  // Buscar estados habilitados
+  useEffect(() => {
+    const fetchStates = async () => {
+      const client = getSupabase();
+      if (!client || !isSupabaseConfigured()) {
+        setLoadingStates(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await client
+          .from("states")
+          .select("*")
+          .eq("is_enabled", true)
+          .order("name");
+
+        if (error) {
+          console.error("Erro ao buscar estados:", error);
+        } else {
+          setStates(data || []);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar estados:", err);
+      } finally {
+        setLoadingStates(false);
+      }
+    };
+
+    fetchStates();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,11 +100,18 @@ function RegisterContent() {
       return;
     }
 
+    if (!formData.stateId) {
+      setError("Você precisa selecionar um estado");
+      setIsLoading(false);
+      return;
+    }
+
     const { error } = await signUp(
       formData.email,
       formData.password,
       formData.name,
-      formData.phone
+      formData.phone,
+      formData.stateId
     );
 
     if (error) {
@@ -82,8 +127,9 @@ function RegisterContent() {
     setSuccess(true);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
@@ -228,6 +274,42 @@ function RegisterContent() {
                     className="block w-full pl-10 pr-3 py-3 border border-neutral-medium/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent"
                     placeholder="(00) 00000-0000"
                   />
+                </div>
+              </div>
+
+              {/* State Field */}
+              <div>
+                <label
+                  htmlFor="stateId"
+                  className="block text-sm font-semibold text-primary-deep mb-2"
+                >
+                  Estado
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <MapPin className="h-5 w-5 text-neutral-400" />
+                  </div>
+                  <select
+                    id="stateId"
+                    name="stateId"
+                    required
+                    value={formData.stateId}
+                    onChange={handleChange}
+                    disabled={loadingStates}
+                    className="block w-full pl-10 pr-10 py-3 border border-neutral-medium/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent bg-white disabled:bg-neutral-100 disabled:cursor-not-allowed appearance-none"
+                  >
+                    <option value="">
+                      {loadingStates ? "Carregando estados..." : "Selecione seu estado"}
+                    </option>
+                    {states.map((state) => (
+                      <option key={state.id} value={state.id}>
+                        {state.name} ({state.abbreviation})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <ChevronDown className="h-5 w-5 text-neutral-400" />
+                  </div>
                 </div>
               </div>
 

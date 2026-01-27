@@ -1,14 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Plus, X } from "lucide-react";
-import { usePackagesAdmin } from "@/hooks/usePackages";
+import { usePackagesAdmin, usePackage } from "@/hooks/usePackages";
 
-export default function NovoPacotePage() {
+function NovoPacoteContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const cloneId = searchParams.get("clonar");
   const { createPackage } = usePackagesAdmin();
+  
+  // Evitar chamadas desnecessárias quando não há cloneId
+  const isCloning = !!cloneId;
+  const { package: packageToClone, isLoading: loadingClone } = usePackage(cloneId || "");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -28,6 +34,42 @@ export default function NovoPacotePage() {
     display_order: 1,
     is_active: true,
   });
+
+  // Preencher formulário quando clonar um pacote
+  useEffect(() => {
+    if (isCloning && packageToClone && !loadingClone) {
+      const generateSlug = (name: string) => {
+        return name
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+      };
+
+      const clonedName = `${packageToClone.name} (Cópia)`;
+      const clonedSlug = `${generateSlug(packageToClone.name)}-copia`;
+
+      setFormData({
+        name: clonedName,
+        slug: clonedSlug,
+        price: packageToClone.price,
+        description: packageToClone.description || "",
+        features: (packageToClone.features as string[]).length > 0 
+          ? (packageToClone.features as string[]) 
+          : [""],
+        practical_hours: packageToClone.practical_hours,
+        theoretical_classes_included: packageToClone.theoretical_classes_included,
+        simulations_included: packageToClone.simulations_included === -1 ? -1 : packageToClone.simulations_included,
+        has_whatsapp_support: packageToClone.has_whatsapp_support,
+        has_instructor_support: packageToClone.has_instructor_support,
+        is_highlighted: false, // Não clonar o destaque
+        highlight_label: "",
+        display_order: packageToClone.display_order + 1, // Incrementar ordem
+        is_active: true, // Sempre começar como ativo
+      });
+    }
+  }, [isCloning, packageToClone, loadingClone]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,18 +153,53 @@ export default function NovoPacotePage() {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h2 className="text-2xl font-bold text-primary-deep">Novo Pacote</h2>
-          <p className="text-neutral-600">Adicione um novo plano à plataforma</p>
+          <h2 className="text-2xl font-bold text-primary-deep">
+            {isCloning ? "Clonar Pacote" : "Novo Pacote"}
+          </h2>
+          <p className="text-neutral-600">
+            {isCloning 
+              ? loadingClone 
+                ? "Carregando pacote para clonar..." 
+                : packageToClone 
+                  ? `Clonando: ${packageToClone.name}` 
+                  : "Pacote não encontrado"
+              : "Adicione um novo plano à plataforma"}
+          </p>
         </div>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
-          </div>
-        )}
+      {isCloning && loadingClone ? (
+        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8 text-center">
+          <div className="w-8 h-8 border-2 border-primary-blue border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <p className="text-neutral-600">Carregando pacote para clonar...</p>
+        </div>
+      ) : isCloning && !packageToClone ? (
+        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8 text-center">
+          <p className="text-red-600 mb-4">Pacote não encontrado</p>
+          <Link
+            href="/admin/pacotes"
+            className="inline-block text-primary-blue hover:text-primary-deep"
+          >
+            Voltar para lista de pacotes
+          </Link>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          {isCloning && packageToClone && (
+            <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
+              <p className="text-sm">
+                <strong>Clonando pacote:</strong> Os dados foram preenchidos automaticamente. 
+                Revise e ajuste conforme necessário antes de salvar.
+              </p>
+            </div>
+          )}
 
         <div className="space-y-6">
           {/* Name & Slug */}
@@ -272,14 +349,23 @@ export default function NovoPacotePage() {
               <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Simulados
               </label>
-              <input
-                type="number"
-                name="simulations_included"
-                value={formData.simulations_included}
-                onChange={handleChange}
-                min={0}
-                className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-blue"
-              />
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="simulations_unlimited"
+                  checked={formData.simulations_included === -1}
+                  onChange={(e) => {
+                    setFormData({
+                      ...formData,
+                      simulations_included: e.target.checked ? -1 : 0,
+                    });
+                  }}
+                  className="w-4 h-4 text-primary-blue focus:ring-primary-blue border-neutral-300 rounded"
+                />
+                <label htmlFor="simulations_unlimited" className="text-sm text-neutral-700">
+                  Ilimitados
+                </label>
+              </div>
             </div>
           </div>
 
@@ -381,7 +467,26 @@ export default function NovoPacotePage() {
           </div>
         </div>
       </form>
+      )}
     </div>
   );
 }
+
+export default function NovoPacotePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-3xl mx-auto space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8 text-center">
+            <div className="w-8 h-8 border-2 border-primary-blue border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-neutral-600">Carregando...</p>
+          </div>
+        </div>
+      }
+    >
+      <NovoPacoteContent />
+    </Suspense>
+  );
+}
+
 

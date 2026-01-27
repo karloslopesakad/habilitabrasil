@@ -14,42 +14,42 @@ const faqs: FAQItem[] = [
   {
     question: "Quais são as novas regras para tirar CNH em 2025?",
     answer:
-      "As principais mudanças incluem: curso teórico de 45 horas/aula (podendo ser online), mínimo de 2 aulas práticas obrigatórias, prova teórica com 30 questões (precisa acertar 21 para aprovação), processo mais digitalizado com menos papelada, e possibilidade de fazer parte do processo online. O tempo total do processo pode variar de 3 a 6 meses dependendo do estado.",
+      "As principais regras para 2025 incluem: (1) Curso teórico de 45 horas/aula obrigatórias, que pode ser feito 100% online desde 2020; (2) Mínimo de 2 aulas práticas obrigatórias de 50 minutos cada, mas recomenda-se mais para maior segurança; (3) Prova teórica com 30 questões de múltipla escolha, sendo necessário acertar pelo menos 21 questões (70%) para aprovação; (4) Processo totalmente digitalizado através do Portal do Cidadão do DETRAN, reduzindo a necessidade de documentos físicos; (5) Exames médicos e psicológicos obrigatórios antes de iniciar as aulas práticas; (6) Prova prática de direção veicular com avaliação de habilidades básicas; (7) CNH provisória (PPD) válida por 1 ano após aprovação na prova prática; (8) CNH definitiva concedida automaticamente após 1 ano sem infrações graves ou gravíssimas. O tempo total do processo varia de 3 a 6 meses dependendo do estado e da disponibilidade de agendamentos.",
   },
   {
     question: "Quais documentos são necessários para iniciar o processo?",
     answer:
-      "Você precisa de: RG original e cópia, CPF, comprovante de residência atualizado (últimos 3 meses), foto 3x4 recente com fundo branco, laudo de exame médico (oftalmológico e clínico geral), e laudo de exame psicológico. Todos os documentos devem estar em dia e legíveis. Alguns estados podem exigir documentos adicionais.",
+      "Com o processo digitalizado de 2025, você precisará de: (1) RG ou CNH (se já tiver) original e cópia digitalizada; (2) CPF; (3) Comprovante de residência atualizado (últimos 3 meses) - aceita-se conta de luz, água, telefone ou internet; (4) Foto 3x4 recente com fundo branco (alguns estados aceitam foto digital); (5) Laudo de exame médico (oftalmológico e clínico geral) realizado em clínica credenciada pelo DETRAN; (6) Laudo de exame psicológico realizado em clínica credenciada. A maioria dos documentos pode ser enviada digitalmente através do Portal do Cidadão do DETRAN. Alguns estados podem exigir documentos adicionais, então sempre consulte o site do DETRAN do seu estado.",
   },
   {
     question: "Quanto custa tirar a CNH?",
     answer:
-      "Os custos variam por estado, mas geralmente incluem: taxas do DETRAN (R$ 200-400), exames médicos e psicológicos (R$ 150-300), curso teórico (R$ 300-600), e aulas práticas (R$ 50-100 por aula). O total costuma ficar entre R$ 1.500 e R$ 3.000. Nossos pacotes podem ajudar a economizar e organizar esses custos.",
+      "Os custos variam por estado e região, mas em 2025 geralmente incluem: (1) Taxas do DETRAN (R$ 200-500) - incluem primeira habilitação, prova teórica e prova prática; (2) Exames médicos e psicológicos (R$ 150-350) - realizados em clínicas credenciadas; (3) Curso teórico (R$ 300-800) - varia se for presencial ou online; (4) Aulas práticas (R$ 60-120 por aula de 50 minutos) - mínimo de 2 obrigatórias, mas a média é de 5-10 aulas; (5) Taxas de reprovação (se necessário) - R$ 100-200 por nova tentativa. O total costuma ficar entre R$ 1.800 e R$ 3.500 dependendo do estado e quantidade de aulas práticas. Nossos pacotes podem ajudar a economizar e organizar esses custos de forma mais acessível.",
   },
   {
     question: "Posso fazer o curso teórico online?",
     answer:
-      "Sim! Desde 2020, é permitido fazer o curso teórico totalmente online. Você precisa completar as 45 horas/aula exigidas e obter o certificado de conclusão antes de agendar a prova teórica. Nossos pacotes incluem acesso a aulas gravadas e simulados para facilitar seu aprendizado.",
+      "Sim! Desde 2020, é permitido fazer o curso teórico totalmente online através de CFCs (Centros de Formação de Condutores) credenciados. Em 2025, essa modalidade continua válida e é amplamente utilizada. Você precisa: (1) Completar as 45 horas/aula obrigatórias; (2) Assistir às aulas em plataforma credenciada pelo DETRAN; (3) Obter o certificado de conclusão do curso teórico; (4) Agendar a prova teórica no DETRAN. O certificado é válido em todo o território nacional. Nossos pacotes incluem acesso a aulas gravadas, materiais de estudo e simulados ilimitados para facilitar seu aprendizado e aumentar suas chances de aprovação.",
   },
   {
     question: "Quantas aulas práticas são obrigatórias?",
     answer:
-      "O mínimo obrigatório são 2 aulas práticas, mas recomendamos fazer mais aulas se você não se sentir confiante. Muitas pessoas fazem entre 5 e 10 aulas práticas antes da prova. Nossos pacotes Driver incluem aulas práticas com instrutores qualificados.",
+      "O mínimo obrigatório por lei são 2 aulas práticas de 50 minutos cada, mas isso é apenas o mínimo legal. Na prática, a maioria dos candidatos faz entre 5 e 10 aulas práticas antes de se sentirem confiantes para a prova. As aulas práticas são essenciais para aprender: direção defensiva, manobras básicas, estacionamento, baliza, e condução em diferentes situações de trânsito. Recomendamos fortemente fazer mais aulas se você não tiver experiência prévia com direção. Nossos pacotes Driver incluem aulas práticas com instrutores qualificados e experientes, aumentando significativamente suas chances de aprovação na primeira tentativa.",
   },
   {
     question: "O que acontece se eu reprovar na prova teórica?",
     answer:
-      "Se você reprovar na prova teórica (acertar menos de 21 questões), você pode refazer a prova após 15 dias. Não há limite de tentativas, mas cada nova prova tem uma taxa adicional. Recomendamos usar nossos simulados e materiais de estudo para se preparar bem antes da primeira tentativa.",
+      "Se você reprovar na prova teórica (acertar menos de 21 questões das 30), você pode refazer a prova após um período de 15 dias corridos. Não há limite de tentativas, mas cada nova prova tem uma taxa adicional (geralmente entre R$ 100-200 dependendo do estado). O resultado da prova é divulgado imediatamente após a conclusão. Recomendamos fortemente usar nossos simulados ilimitados e materiais de estudo para se preparar bem antes da primeira tentativa, evitando custos extras e atrasos no processo. Nossos simulados seguem o mesmo formato da prova oficial, com 30 questões e necessidade de 70% de acertos.",
   },
   {
     question: "O que acontece se eu reprovar na prova prática?",
     answer:
-      "Se reprovar na prova prática, você pode refazer após 15 dias. Recomendamos fazer aulas de reforço antes de tentar novamente. Nossos pacotes incluem aulas adicionais para aumentar suas chances de aprovação na primeira tentativa.",
+      "Se reprovar na prova prática de direção, você pode refazer após um período de 15 dias corridos. Não há limite de tentativas, mas cada nova prova tem uma taxa adicional (geralmente entre R$ 150-250). A prova prática avalia: conhecimento do veículo, manobras básicas, estacionamento, baliza, direção defensiva e respeito às leis de trânsito. Recomendamos fortemente fazer aulas de reforço antes de tentar novamente, focando nas áreas em que você teve dificuldade. Nossos pacotes incluem aulas adicionais e suporte de instrutores experientes para aumentar suas chances de aprovação na primeira tentativa e evitar custos extras.",
   },
   {
     question: "Quanto tempo leva para receber a CNH definitiva?",
     answer:
-      "Após ser aprovado na prova prática, você recebe a CNH provisória (PPD - Permissão para Dirigir) que tem validade de 1 ano. Durante esse período, você não pode cometer infrações graves ou gravíssimas. Após 1 ano sem problemas, você recebe a CNH definitiva automaticamente.",
+      "Após ser aprovado na prova prática, você recebe a CNH provisória (PPD - Permissão para Dirigir) que tem validade de 1 ano. A PPD é emitida em até 30 dias após a aprovação. Durante esse período de 1 ano, você NÃO pode cometer: (1) Infrações graves (multa + pontos na CNH); (2) Infrações gravíssimas (multa + pontos na CNH); (3) Acumular mais de 19 pontos na CNH. Se cometer qualquer uma dessas infrações, você terá que refazer todo o processo desde o início. Após 1 ano sem problemas, você recebe a CNH definitiva automaticamente pelo DETRAN, sem necessidade de fazer nova prova ou pagar taxas adicionais. A CNH definitiva tem validade de 10 anos para condutores até 50 anos, 5 anos para condutores entre 50 e 70 anos, e 3 anos para condutores acima de 70 anos.",
   },
   {
     question: "Posso tirar CNH em carro automático?",

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Star, Check, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, Check, X, Copy } from "lucide-react";
 import { usePackagesAdmin } from "@/hooks/usePackages";
 
 export default function PacotesPage() {
@@ -76,8 +76,16 @@ export default function PacotesPage() {
                 </div>
                 <div className="flex items-center space-x-1">
                   <Link
+                    href={`/admin/pacotes/novo?clonar=${pkg.id}`}
+                    className="p-2 text-neutral-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                    title="Clonar pacote"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Link>
+                  <Link
                     href={`/admin/pacotes/${pkg.id}`}
                     className="p-2 text-neutral-600 hover:text-primary-blue hover:bg-neutral-100 rounded-lg transition-colors"
+                    title="Editar pacote"
                   >
                     <Pencil className="w-4 h-4" />
                   </Link>
@@ -85,6 +93,7 @@ export default function PacotesPage() {
                     onClick={() => handleDelete(pkg.id)}
                     disabled={deleting === pkg.id}
                     className="p-2 text-neutral-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                    title="Excluir pacote"
                   >
                     {deleting === pkg.id ? (
                       <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
@@ -170,4 +179,5 @@ export default function PacotesPage() {
     </div>
   );
 }
+
 

@@ -9,10 +9,21 @@ export type PackageStatus = 'active' | 'expired' | 'cancelled';
 export type VehicleType = 'manual' | 'automatic';
 export type ClassStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show';
 export type UserRole = 'user' | 'admin' | 'instructor';
+export type QuestionCategory = 'legislacao' | 'direcao_defensiva' | 'primeiros_socorros' | 'meio_ambiente' | 'mecanica';
+export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
 
 // ===========================================
 // Entidades Principais
 // ===========================================
+
+export interface State {
+  id: string;
+  name: string;
+  abbreviation: string;
+  is_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface Profile {
   id: string;
@@ -20,8 +31,11 @@ export interface Profile {
   phone: string | null;
   role: UserRole;
   avatar_url: string | null;
+  state_id: string | null;
   created_at: string;
   updated_at: string;
+  // Relacionamento
+  state?: State;
 }
 
 export interface Package {
@@ -144,6 +158,35 @@ export interface UserProgress {
   updated_at: string;
   // Relacionamento
   step?: Step;
+}
+
+export interface SimulationQuestion {
+  id: string;
+  question: string;
+  options: string[]; // [A, B, C, D]
+  correct_answer: 'A' | 'B' | 'C' | 'D';
+  category: QuestionCategory;
+  explanation: string | null;
+  difficulty: QuestionDifficulty;
+  created_at: string;
+}
+
+export interface SimulationAttempt {
+  id: string;
+  user_id: string;
+  step_id: string;
+  score: number; // 0-30
+  percentage: number; // 0-100
+  passed: boolean;
+  time_spent_seconds: number;
+  answers: Record<string, string>; // { question_id: answer }
+  question_ids: string[];
+  started_at: string;
+  completed_at: string | null;
+  created_at: string;
+  // Relacionamentos
+  step?: Step;
+  questions?: SimulationQuestion[];
 }
 
 export interface ClassRegistration {

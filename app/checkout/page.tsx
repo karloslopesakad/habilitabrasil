@@ -144,10 +144,14 @@ function CheckoutContent() {
                     <span>{packageData.theoretical_classes_included} aulas teóricas</span>
                   </div>
                 )}
-                {packageData.simulations_included > 0 && (
+                {(packageData.simulations_included > 0 || packageData.simulations_included === -1) && (
                   <div className="flex items-center space-x-2 text-sm text-neutral-700">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>{packageData.simulations_included} simulados</span>
+                    <span>
+                      {packageData.simulations_included === -1 
+                        ? "Simulados ilimitados" 
+                        : `${packageData.simulations_included} simulados`}
+                    </span>
                   </div>
                 )}
                 {packageData.has_whatsapp_support && (

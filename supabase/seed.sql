@@ -195,3 +195,4 @@ INSERT INTO settings (key, value, description) VALUES
   'Informações gerais do site'
 );
 
+

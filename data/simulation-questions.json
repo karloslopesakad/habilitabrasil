@@ -1,0 +1,283 @@
+[
+  {
+    "id": "q001",
+    "question": "Qual a velocidade máxima permitida para veículos automotores em vias urbanas, salvo quando sinalização indicar outra velocidade?",
+    "options": [
+      "60 km/h",
+      "80 km/h",
+      "100 km/h",
+      "120 km/h"
+    ],
+    "correct_answer": "A",
+    "category": "legislacao",
+    "explanation": "Em vias urbanas, a velocidade máxima permitida é de 60 km/h, exceto quando sinalização indicar outra velocidade.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q002",
+    "question": "O condutor que estiver habilitado na categoria B pode conduzir:",
+    "options": [
+      "Apenas veículos de passeio",
+      "Veículos de passeio e motocicletas",
+      "Veículos de passeio e caminhões leves",
+      "Apenas veículos automotores de duas rodas"
+    ],
+    "correct_answer": "A",
+    "category": "legislacao",
+    "explanation": "A categoria B permite conduzir veículos de passeio, com peso bruto total de até 3.500 kg e lotação de até 8 lugares.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q003",
+    "question": "Qual a distância mínima que deve ser mantida entre veículos em movimento?",
+    "options": [
+      "Metade da velocidade em metros",
+      "Velocidade em metros",
+      "O dobro da velocidade em metros",
+      "Não há distância mínima obrigatória"
+    ],
+    "correct_answer": "A",
+    "explanation": "A distância mínima entre veículos deve ser de pelo menos metade da velocidade em metros. Ex: a 60 km/h, manter pelo menos 30 metros.",
+    "category": "direcao_defensiva",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q004",
+    "question": "Em caso de acidente com vítima, a primeira ação do condutor deve ser:",
+    "options": [
+      "Remover a vítima do local",
+      "Sinalizar o local do acidente",
+      "Ligar para a emergência (193 ou 190)",
+      "Tentar reanimar a vítima"
+    ],
+    "correct_answer": "C",
+    "category": "primeiros_socorros",
+    "explanation": "A primeira ação deve ser ligar para os serviços de emergência (SAMU 193 ou Polícia 190) e sinalizar o local.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q005",
+    "question": "O que significa a placa de regulamentação R-1?",
+    "options": [
+      "Proibido estacionar",
+      "Proibido parar",
+      "Proibido ultrapassar",
+      "Velocidade máxima permitida"
+    ],
+    "correct_answer": "B",
+    "category": "legislacao",
+    "explanation": "A placa R-1 significa 'Proibido parar', ou seja, não é permitido parar o veículo no local.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q006",
+    "question": "Qual a distância mínima para ultrapassagem segura?",
+    "options": [
+      "50 metros de visibilidade",
+      "100 metros de visibilidade",
+      "200 metros de visibilidade",
+      "300 metros de visibilidade"
+    ],
+    "correct_answer": "C",
+    "category": "direcao_defensiva",
+    "explanation": "Para ultrapassagem segura, é necessário ter pelo menos 200 metros de visibilidade à frente.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q007",
+    "question": "Em caso de queimadura, o que NÃO deve ser feito?",
+    "options": [
+      "Aplicar água corrente fria",
+      "Remover roupas grudadas na pele",
+      "Aplicar pomadas ou cremes",
+      "Cobrir com pano limpo"
+    ],
+    "correct_answer": "C",
+    "category": "primeiros_socorros",
+    "explanation": "Não se deve aplicar pomadas, cremes ou qualquer substância em queimaduras. Apenas água corrente fria e cobrir com pano limpo.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q008",
+    "question": "O que significa a cor amarela no semáforo?",
+    "options": [
+      "Atenção, prepare-se para parar",
+      "Pode passar com segurança",
+      "Parar obrigatoriamente",
+      "Acelerar para passar"
+    ],
+    "correct_answer": "A",
+    "category": "legislacao",
+    "explanation": "O amarelo significa atenção, o condutor deve parar, salvo se não puder fazê-lo com segurança.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q009",
+    "question": "Qual a principal causa de acidentes de trânsito?",
+    "options": [
+      "Falhas mecânicas",
+      "Condições da via",
+      "Fator humano",
+      "Condições climáticas"
+    ],
+    "correct_answer": "C",
+    "category": "direcao_defensiva",
+    "explanation": "O fator humano (desatenção, imprudência, embriaguez) é a principal causa de acidentes de trânsito.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q010",
+    "question": "O que fazer em caso de vítima inconsciente sem respiração?",
+    "options": [
+      "Aguardar a ambulância",
+      "Iniciar massagem cardíaca imediatamente",
+      "Virar a vítima de lado",
+      "Dar água para a vítima"
+    ],
+    "correct_answer": "B",
+    "category": "primeiros_socorros",
+    "explanation": "Em caso de parada cardiorrespiratória, deve-se iniciar imediatamente a massagem cardíaca (RCP) enquanto aguarda socorro.",
+    "difficulty": "hard"
+  },
+  {
+    "id": "q011",
+    "question": "Qual a velocidade máxima em rodovias para veículos de passeio?",
+    "options": [
+      "80 km/h",
+      "100 km/h",
+      "110 km/h",
+      "120 km/h"
+    ],
+    "correct_answer": "C",
+    "category": "legislacao",
+    "explanation": "Em rodovias, a velocidade máxima para veículos de passeio é de 110 km/h, salvo sinalização indicando outra velocidade.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q012",
+    "question": "O que é direção defensiva?",
+    "options": [
+      "Dirigir devagar sempre",
+      "Conjunto de medidas para prevenir acidentes",
+      "Ultrapassar com cuidado",
+      "Respeitar apenas os sinais de trânsito"
+    ],
+    "correct_answer": "B",
+    "category": "direcao_defensiva",
+    "explanation": "Direção defensiva é o conjunto de medidas e procedimentos utilizados para prevenir ou minimizar as consequências dos acidentes de trânsito.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q013",
+    "question": "Qual o tempo de validade da CNH para condutores até 50 anos?",
+    "options": [
+      "3 anos",
+      "5 anos",
+      "10 anos",
+      "15 anos"
+    ],
+    "correct_answer": "C",
+    "category": "legislacao",
+    "explanation": "A CNH tem validade de 10 anos para condutores até 50 anos de idade.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q014",
+    "question": "O que fazer ao encontrar um acidente de trânsito?",
+    "options": [
+      "Parar e ajudar imediatamente",
+      "Sinalizar o local e chamar socorro",
+      "Continuar o trajeto",
+      "Tirar fotos e seguir"
+    ],
+    "correct_answer": "B",
+    "category": "primeiros_socorros",
+    "explanation": "Ao encontrar um acidente, deve-se sinalizar o local para evitar novos acidentes e chamar os serviços de emergência.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q015",
+    "question": "Qual a função do sistema de freios ABS?",
+    "options": [
+      "Aumentar a distância de frenagem",
+      "Evitar o travamento das rodas",
+      "Melhorar a aceleração",
+      "Reduzir o consumo de combustível"
+    ],
+    "correct_answer": "B",
+    "category": "mecanica",
+    "explanation": "O ABS (Anti-lock Braking System) evita o travamento das rodas durante a frenagem, mantendo a dirigibilidade do veículo.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q016",
+    "question": "Em vias com velocidade máxima de 80 km/h, qual a distância mínima entre veículos?",
+    "options": [
+      "20 metros",
+      "40 metros",
+      "60 metros",
+      "80 metros"
+    ],
+    "correct_answer": "B",
+    "category": "direcao_defensiva",
+    "explanation": "A distância mínima é metade da velocidade em metros. A 80 km/h, deve-se manter pelo menos 40 metros.",
+    "difficulty": "medium"
+  },
+  {
+    "id": "q017",
+    "question": "O que significa a placa de advertência A-1?",
+    "options": [
+      "Curva à direita",
+      "Curva à esquerda",
+      "Curva sinuosa",
+      "Intersecção em T"
+    ],
+    "correct_answer": "A",
+    "category": "legislacao",
+    "explanation": "A placa A-1 indica curva à direita à frente, alertando o condutor para reduzir a velocidade.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q018",
+    "question": "Qual a pressão ideal dos pneus?",
+    "options": [
+      "A indicada pelo fabricante do veículo",
+      "Sempre 30 PSI",
+      "Quanto mais alta melhor",
+      "Não importa a pressão"
+    ],
+    "correct_answer": "A",
+    "category": "mecanica",
+    "explanation": "A pressão dos pneus deve ser a indicada pelo fabricante do veículo, geralmente encontrada no manual ou na porta do motorista.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q019",
+    "question": "O que fazer ao avistar um veículo de emergência com sirene ligada?",
+    "options": [
+      "Acelerar para sair da frente",
+      "Parar imediatamente onde estiver",
+      "Encostar à direita e parar",
+      "Continuar normalmente"
+    ],
+    "correct_answer": "C",
+    "category": "legislacao",
+    "explanation": "Ao avistar veículo de emergência, deve-se encostar à direita e parar, facilitando a passagem.",
+    "difficulty": "easy"
+  },
+  {
+    "id": "q020",
+    "question": "Qual a importância da manutenção preventiva do veículo?",
+    "options": [
+      "Apenas economizar dinheiro",
+      "Garantir segurança e evitar acidentes",
+      "Satisfazer a garantia",
+      "Não tem importância"
+    ],
+    "correct_answer": "B",
+    "category": "mecanica",
+    "explanation": "A manutenção preventiva é essencial para garantir a segurança do veículo e evitar acidentes causados por falhas mecânicas.",
+    "difficulty": "easy"
+  }
+]
+

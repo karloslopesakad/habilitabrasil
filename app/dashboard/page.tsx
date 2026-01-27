@@ -313,10 +313,12 @@ function DashboardContent() {
                             </p>
                           )}
                         {userPackage.package?.simulations_included &&
-                          userPackage.package.simulations_included > 0 && (
+                          (userPackage.package.simulations_included > 0 || userPackage.package.simulations_included === -1) && (
                             <p>
                               Simulados: {userPackage.simulations_used} /{" "}
-                              {userPackage.package.simulations_included}
+                              {userPackage.package.simulations_included === -1 
+                                ? "Ilimitados" 
+                                : userPackage.package.simulations_included}
                             </p>
                           )}
                       </div>

@@ -74,3 +74,4 @@ WHERE schemaname = 'public'
                     'settings', 'payments')
 ORDER BY tablename;
 
+

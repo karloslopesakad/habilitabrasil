@@ -17,6 +17,7 @@ const DEMO_PROFILE: Profile = {
   phone: "(11) 99999-9999",
   role: "user",
   avatar_url: null,
+  state_id: null,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
 };
@@ -221,7 +222,7 @@ export function useAuth() {
     return { data, error };
   };
 
-  const signUp = async (email: string, password: string, name: string, phone: string) => {
+  const signUp = async (email: string, password: string, name: string, phone: string, stateId?: string) => {
     const client = getSupabase();
     
     // Modo demo
@@ -240,6 +241,7 @@ export function useAuth() {
         data: {
           name,
           phone,
+          state_id: stateId || null,
         },
       },
     });
@@ -322,7 +324,9 @@ export function useAuth() {
     (userPackage?.package?.theoretical_classes_included ?? 0) - (userPackage?.theoretical_classes_used ?? 0);
   
   const simulationsRemaining = 
-    (userPackage?.package?.simulations_included ?? 0) - (userPackage?.simulations_used ?? 0);
+    (userPackage?.package?.simulations_included ?? 0) === -1
+      ? Infinity
+      : (userPackage?.package?.simulations_included ?? 0) - (userPackage?.simulations_used ?? 0);
 
   const userContext: UserContext = {
     user: user ? { id: user.id, email: user.email! } : null,

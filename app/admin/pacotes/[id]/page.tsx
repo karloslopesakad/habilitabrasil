@@ -44,7 +44,7 @@ export default function EditarPacotePage() {
         features: (pkg.features as string[]).length > 0 ? (pkg.features as string[]) : [""],
         practical_hours: pkg.practical_hours,
         theoretical_classes_included: pkg.theoretical_classes_included,
-        simulations_included: pkg.simulations_included,
+        simulations_included: pkg.simulations_included === -1 ? -1 : pkg.simulations_included,
         has_whatsapp_support: pkg.has_whatsapp_support,
         has_instructor_support: pkg.has_instructor_support,
         is_highlighted: pkg.is_highlighted,
@@ -295,14 +295,23 @@ export default function EditarPacotePage() {
               <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Simulados
               </label>
-              <input
-                type="number"
-                name="simulations_included"
-                value={formData.simulations_included}
-                onChange={handleChange}
-                min={0}
-                className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-blue"
-              />
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="simulations_unlimited"
+                  checked={formData.simulations_included === -1}
+                  onChange={(e) => {
+                    setFormData({
+                      ...formData,
+                      simulations_included: e.target.checked ? -1 : 0,
+                    });
+                  }}
+                  className="w-4 h-4 text-primary-blue focus:ring-primary-blue border-neutral-300 rounded"
+                />
+                <label htmlFor="simulations_unlimited" className="text-sm text-neutral-700">
+                  Ilimitados
+                </label>
+              </div>
             </div>
           </div>
 
@@ -407,4 +416,5 @@ export default function EditarPacotePage() {
     </div>
   );
 }
+
 

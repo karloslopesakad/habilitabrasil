@@ -1,8 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Step, ProgressStatus } from "@/types/database";
-import { FileCheck, ExternalLink, Check, Clock, Circle, Award } from "lucide-react";
+import { FileCheck, Check, Clock, Circle, Award, Trophy, History } from "lucide-react";
 import WhatsAppButton from "./WhatsAppButton";
+import { useSimulation } from "@/hooks/useSimulation";
+import { useAuth } from "@/hooks/useAuth";
 
 interface StepSimulationProps {
   step: Step;
@@ -21,6 +25,28 @@ export default function StepSimulation({
   simulationsIncluded,
   onStatusChange,
 }: StepSimulationProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const { getBestScore, getAttemptHistory } = useSimulation();
+  const [bestScore, setBestScore] = useState<{ score: number; percentage: number } | null>(null);
+  const [recentAttempts, setRecentAttempts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user && step.id) {
+      getBestScore(user.id, step.id).then(({ data }) => {
+        if (data) {
+          setBestScore({ score: data.score, percentage: data.percentage });
+        }
+      });
+
+      getAttemptHistory(user.id, step.id, 5).then(({ data }) => {
+        if (data) {
+          setRecentAttempts(data);
+        }
+      });
+    }
+  }, [user, step.id, getBestScore, getAttemptHistory]);
+
   const statusIcons = {
     not_started: <Circle className="w-5 h-5 text-neutral-400" />,
     in_progress: <Clock className="w-5 h-5 text-yellow-500" />,
@@ -33,12 +59,15 @@ export default function StepSimulation({
     completed: "bg-green-50 border-green-200",
   };
 
-  const simulationsRemaining = simulationsIncluded - simulationsUsed;
+  const simulationsRemaining = simulationsIncluded === -1 
+    ? Infinity 
+    : simulationsIncluded - simulationsUsed;
 
-  const handleStartClick = () => {
-    if (status === "not_started" && onStatusChange) {
-      onStatusChange(step.id, "in_progress");
-    }
+  const canStartSimulation = simulationsIncluded === -1 || simulationsRemaining > 0;
+
+  const handleStartSimulation = () => {
+    if (!canStartSimulation) return;
+    router.push(`/simulado/${step.id}`);
   };
 
   return (
@@ -57,11 +86,11 @@ export default function StepSimulation({
           </div>
         </div>
 
-        {simulationsIncluded > 0 && (
+        {(simulationsIncluded > 0 || simulationsIncluded === -1) && (
           <div className="text-right">
             <p className="text-sm text-neutral-600">Simulados realizados</p>
             <p className="font-bold text-primary-deep">
-              {simulationsUsed} / {simulationsIncluded}
+              {simulationsUsed} / {simulationsIncluded === -1 ? "Ilimitados" : simulationsIncluded}
             </p>
           </div>
         )}
@@ -96,7 +125,7 @@ export default function StepSimulation({
       </div>
 
       {/* Progress Bar */}
-      {simulationsIncluded > 0 && (
+      {simulationsIncluded > 0 && simulationsIncluded !== -1 && (
         <div className="mb-4">
           <div className="flex justify-between text-sm text-neutral-600 mb-1">
             <span>Progresso</span>
@@ -111,37 +140,61 @@ export default function StepSimulation({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
-        {step.external_link && (
-          <a
-            href={step.external_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`inline-flex items-center space-x-2 bg-primary-blue text-white px-4 py-2 rounded-lg hover:bg-primary-deep transition-colors ${
-              simulationsIncluded > 0 && simulationsRemaining <= 0
-                ? "opacity-50 cursor-not-allowed"
-                : ""
-            }`}
-            onClick={(e) => {
-              if (simulationsIncluded > 0 && simulationsRemaining <= 0) {
-                e.preventDefault();
-              }
-            }}
-          >
-            <ExternalLink className="w-4 h-4" />
-            <span>Iniciar Simulado</span>
-          </a>
-        )}
+      {/* Best Score */}
+      {bestScore && (
+        <div className="bg-white/70 rounded-lg p-4 mb-4">
+          <div className="flex items-center space-x-3">
+            <Trophy className="w-8 h-8 text-yellow-500" />
+            <div>
+              <p className="text-sm text-neutral-600">Melhor nota</p>
+              <p className="font-bold text-primary-deep">
+                {bestScore.score}/30 ({bestScore.percentage.toFixed(1)}%)
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
-        {status === "not_started" && (
-          <button
-            onClick={handleStartClick}
-            className="inline-flex items-center space-x-2 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors"
-          >
-            <Clock className="w-4 h-4" />
-            <span>Começar a praticar</span>
-          </button>
-        )}
+      {/* Recent Attempts */}
+      {recentAttempts.length > 0 && (
+        <div className="bg-white/70 rounded-lg p-4 mb-4">
+          <div className="flex items-center space-x-2 mb-3">
+            <History className="w-5 h-5 text-primary-blue" />
+            <h4 className="font-medium text-primary-deep">Últimas tentativas</h4>
+          </div>
+          <div className="space-y-2">
+            {recentAttempts.slice(0, 3).map((attempt) => (
+              <div
+                key={attempt.id}
+                className="flex items-center justify-between text-sm"
+              >
+                <span className="text-neutral-600">
+                  {new Date(attempt.completed_at || attempt.created_at).toLocaleDateString("pt-BR")}
+                </span>
+                <span
+                  className={`font-semibold ${
+                    attempt.passed ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {attempt.score}/30 ({attempt.percentage.toFixed(0)}%)
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={handleStartSimulation}
+          disabled={!canStartSimulation}
+          className={`inline-flex items-center space-x-2 bg-primary-blue text-white px-4 py-2 rounded-lg hover:bg-primary-deep transition-colors ${
+            !canStartSimulation ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          <FileCheck className="w-4 h-4" />
+          <span>Iniciar Simulado</span>
+        </button>
 
         {hasWhatsappSupport && (
           <WhatsAppButton
@@ -151,7 +204,7 @@ export default function StepSimulation({
         )}
       </div>
 
-      {simulationsIncluded > 0 && simulationsRemaining <= 0 && (
+      {simulationsIncluded > 0 && simulationsIncluded !== -1 && simulationsRemaining <= 0 && (
         <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
           <p className="text-sm text-yellow-800">
             Você já utilizou todos os simulados do seu plano.
@@ -162,4 +215,5 @@ export default function StepSimulation({
     </div>
   );
 }
+
 
