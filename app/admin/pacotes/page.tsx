@@ -6,14 +6,58 @@ import { Plus, Pencil, Trash2, Star, Check, X, Copy } from "lucide-react";
 import { usePackagesAdmin } from "@/hooks/usePackages";
 
 export default function PacotesPage() {
-  const { packages, isLoading, deletePackage } = usePackagesAdmin();
+  const { packages, isLoading, deletePackage, refetch } = usePackagesAdmin();
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
-    if (confirm("Tem certeza que deseja excluir este pacote?")) {
-      setDeleting(id);
-      await deletePackage(id);
-      setDeleting(null);
+    setError(null);
+    
+    const pkg = packages.find((p) => p.id === id);
+    const isActive = pkg?.is_active ?? true;
+    
+    if (isActive) {
+      // Se está ativo, fazer soft delete (marcar como inativo)
+      if (confirm("Tem certeza que deseja desativar este pacote? Ele será marcado como inativo mas não será removido.")) {
+        setDeleting(id);
+        const { error } = await deletePackage(id, false);
+        setDeleting(null);
+        
+        if (error) {
+          setError(error.message);
+          // Se soft delete falhou, oferecer deletar fisicamente
+          if (error.message.includes("foreign key") || error.message.includes("referenced")) {
+            const forceDelete = confirm(
+              "Este pacote está sendo usado por usuários. Deseja deletá-lo permanentemente? Isso também removerá os registros relacionados (user_packages e payments)."
+            );
+            if (forceDelete) {
+              setDeleting(id);
+              const { error: forceError } = await deletePackage(id, true);
+              setDeleting(null);
+              if (forceError) {
+                setError(forceError.message);
+              } else {
+                await refetch();
+              }
+            }
+          }
+        } else {
+          await refetch();
+        }
+      }
+    } else {
+      // Se já está inativo, oferecer deletar fisicamente
+      if (confirm("Este pacote já está inativo. Deseja deletá-lo permanentemente? Isso também removerá os registros relacionados (user_packages e payments).")) {
+        setDeleting(id);
+        const { error } = await deletePackage(id, true);
+        setDeleting(null);
+        
+        if (error) {
+          setError(error.message);
+        } else {
+          await refetch();
+        }
+      }
     }
   };
 
@@ -33,6 +77,20 @@ export default function PacotesPage() {
           <span>Novo Pacote</span>
         </Link>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          <p className="font-semibold">Erro ao deletar pacote:</p>
+          <p className="text-sm">{error}</p>
+          <button
+            onClick={() => setError(null)}
+            className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+          >
+            Fechar
+          </button>
+        </div>
+      )}
 
       {/* Grid */}
       {isLoading ? (

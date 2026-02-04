@@ -19,10 +19,10 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-br from-primary-deep to-primary-blue rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">H</span>
+              <span className="text-white font-bold text-lg">F</span>
             </div>
             <span className="font-display font-bold text-xl text-primary-deep">
-              HabilitaBrasil
+              FastCNH
             </span>
           </Link>
 

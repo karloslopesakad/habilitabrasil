@@ -10,10 +10,10 @@ export default function Footer() {
           <div className="md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">H</span>
+                <span className="text-white font-bold text-lg">F</span>
               </div>
               <span className="font-display font-bold text-xl">
-                HabilitaBrasil
+                FastCNH
               </span>
             </div>
             <p className="text-white/70 text-sm leading-relaxed">
@@ -138,13 +138,13 @@ export default function Footer() {
             <div className="flex items-start space-x-2 text-sm text-white/70">
               <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
               <p>
-                <strong>Aviso Legal:</strong> O HabilitaBrasil não é um órgão
+                <strong>Aviso Legal:</strong> O FastCNH não é um órgão
                 oficial. Somos uma plataforma de apoio e orientação. Para
                 informações oficiais, consulte o DETRAN do seu estado.
               </p>
             </div>
             <p className="text-sm text-white/70">
-              © 2025 HabilitaBrasil. Todos os direitos reservados.
+              © 2025 FastCNH. Todos os direitos reservados.
             </p>
           </div>
         </div>

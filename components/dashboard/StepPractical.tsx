@@ -1,7 +1,7 @@
 "use client";
 
 import { Step, PracticalClass, Instructor, ProgressStatus, VehicleType } from "@/types/database";
-import { Car, Calendar, Clock, MapPin, User, Check, Circle, Plus } from "lucide-react";
+import { Car, Calendar, Clock, MapPin, User, Check, Circle } from "lucide-react";
 import WhatsAppButton from "./WhatsAppButton";
 import { useState } from "react";
 
@@ -32,12 +32,6 @@ export default function StepPractical({
   onScheduleClass,
   onCancelClass,
 }: StepPracticalProps) {
-  const [showScheduleForm, setShowScheduleForm] = useState(false);
-  const [scheduleData, setScheduleData] = useState({
-    instructor_id: "",
-    scheduled_at: "",
-    vehicle_type: "manual" as VehicleType,
-  });
 
   const statusIcons = {
     not_started: <Circle className="w-5 h-5 text-neutral-400" />,
@@ -68,18 +62,6 @@ export default function StepPractical({
   );
   const completedClasses = practicalClasses.filter((c) => c.status === "completed");
 
-  const handleSubmitSchedule = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (onScheduleClass) {
-      onScheduleClass(scheduleData);
-      setShowScheduleForm(false);
-      setScheduleData({
-        instructor_id: "",
-        scheduled_at: "",
-        vehicle_type: "manual",
-      });
-    }
-  };
 
   return (
     <div className={`rounded-xl border-2 p-6 ${statusColors[status]} transition-all`}>
@@ -216,95 +198,19 @@ export default function StepPractical({
         </div>
       )}
 
-      {/* Schedule Button */}
-      {hoursRemaining > 0 && !showScheduleForm && (
-        <button
-          onClick={() => setShowScheduleForm(true)}
-          className="mt-6 w-full inline-flex items-center justify-center space-x-2 bg-primary-blue text-white px-4 py-3 rounded-lg hover:bg-primary-deep transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Agendar nova aula</span>
-        </button>
-      )}
-
-      {/* Schedule Form */}
-      {showScheduleForm && (
-        <form onSubmit={handleSubmitSchedule} className="mt-6 bg-white rounded-lg p-4 border border-neutral-200">
-          <h4 className="font-medium text-primary-deep mb-4">Agendar aula prática</h4>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Instrutor
-              </label>
-              <select
-                value={scheduleData.instructor_id}
-                onChange={(e) =>
-                  setScheduleData({ ...scheduleData, instructor_id: e.target.value })
-                }
-                required
-                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-blue"
-              >
-                <option value="">Selecione um instrutor</option>
-                {instructors.map((instructor) => (
-                  <option key={instructor.id} value={instructor.id}>
-                    {instructor.name} - {instructor.specialization}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Data e horário
-              </label>
-              <input
-                type="datetime-local"
-                value={scheduleData.scheduled_at}
-                onChange={(e) =>
-                  setScheduleData({ ...scheduleData, scheduled_at: e.target.value })
-                }
-                required
-                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-blue"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Tipo de veículo
-              </label>
-              <select
-                value={scheduleData.vehicle_type}
-                onChange={(e) =>
-                  setScheduleData({
-                    ...scheduleData,
-                    vehicle_type: e.target.value as VehicleType,
-                  })
-                }
-                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-blue"
-              >
-                <option value="manual">Manual</option>
-                <option value="automatic">Automático</option>
-              </select>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="flex-1 bg-primary-blue text-white px-4 py-2 rounded-lg hover:bg-primary-deep transition-colors"
-              >
-                Confirmar agendamento
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowScheduleForm(false)}
-                className="px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </form>
+      {/* Info sobre agendamento */}
+      {hoursRemaining > 0 && (
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800 mb-2">
+            Para agendar uma aula prática, entre em contato conosco pelo WhatsApp.
+          </p>
+          {hasWhatsappSupport && (
+            <WhatsAppButton
+              message={step.whatsapp_message || "Olá! Gostaria de agendar uma aula prática."}
+              variant="outline"
+            />
+          )}
+        </div>
       )}
 
       {hoursIncluded > 0 && hoursRemaining <= 0 && (
@@ -316,7 +222,7 @@ export default function StepPractical({
         </div>
       )}
 
-      {hasWhatsappSupport && (
+      {hasWhatsappSupport && hoursRemaining <= 0 && (
         <div className="mt-6 pt-4 border-t border-neutral-200">
           <p className="text-sm text-neutral-600 mb-2">Precisa de ajuda?</p>
           <WhatsAppButton
@@ -328,5 +234,6 @@ export default function StepPractical({
     </div>
   );
 }
+
 
 

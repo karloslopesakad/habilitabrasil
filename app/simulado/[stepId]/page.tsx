@@ -61,16 +61,28 @@ function SimulationContent() {
       }
 
       // Buscar questões
+      console.log("Buscando questões para stepId:", stepId, "userId:", user.id);
       const { data: fetchedQuestions, error: questionsError } = await fetchQuestions(
         stepId,
         30,
         user.id
       );
 
-      if (questionsError || !fetchedQuestions || fetchedQuestions.length === 0) {
+      if (questionsError) {
+        console.error("Erro ao buscar questões:", questionsError);
+        setLocalError(questionsError.message || "Erro ao carregar questões");
         setState("ready");
         return;
       }
+
+      if (!fetchedQuestions || fetchedQuestions.length === 0) {
+        console.warn("Nenhuma questão retornada");
+        setLocalError("Nenhuma questão disponível no momento. Por favor, verifique se há questões cadastradas no banco de dados.");
+        setState("ready");
+        return;
+      }
+
+      console.log("Questões carregadas:", fetchedQuestions.length);
 
       setQuestions(fetchedQuestions);
       setState("ready");

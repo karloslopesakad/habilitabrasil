@@ -38,7 +38,7 @@ export async function createCheckoutSession({
           currency: 'brl',
           product_data: {
             name: packageName,
-            description: `Pacote ${packageName} - HabilitaBrasil`,
+            description: `Pacote ${packageName} - FastCNH`,
           },
           unit_amount: Math.round(packagePrice * 100), // Converter para centavos
         },

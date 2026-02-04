@@ -11,7 +11,7 @@ const DEMO_SETTINGS: Setting[] = [
     key: "whatsapp_support",
     value: {
       number: "5511999999999",
-      default_message: "Olá! Preciso de ajuda com meu processo de habilitação no HabilitaBrasil.",
+      default_message: "Olá! Preciso de ajuda com meu processo de habilitação no FastCNH.",
     },
     description: "Configurações do WhatsApp de suporte",
     updated_at: new Date().toISOString(),
@@ -20,9 +20,9 @@ const DEMO_SETTINGS: Setting[] = [
     id: "setting-2",
     key: "site_info",
     value: {
-      name: "HabilitaBrasil",
+      name: "FastCNH",
       tagline: "Seu caminho para a CNH começa aqui",
-      support_email: "suporte@habilitabrasil.com",
+      support_email: "suporte@fastcnh.com",
     },
     description: "Informações gerais do site",
     updated_at: new Date().toISOString(),

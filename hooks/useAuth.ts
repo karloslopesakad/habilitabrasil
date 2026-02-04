@@ -8,7 +8,7 @@ import { Profile, UserPackage, UserContext } from "@/types/database";
 // Dados de demo para quando o Supabase não está configurado
 const DEMO_USER = {
   id: "demo-user-id",
-  email: "demo@habilitabrasil.com",
+  email: "demo@fastcnh.com",
 };
 
 const DEMO_PROFILE: Profile = {
@@ -341,6 +341,19 @@ export function useAuth() {
     simulationsRemaining,
   };
 
+  // Memoizar refreshProfile para evitar loops infinitos
+  const refreshProfile = useCallback(() => {
+    if (user && !isDemoMode && isSupabaseConfigured()) {
+      fetchProfile(user.id, true);
+    }
+  }, [user, isDemoMode, fetchProfile]);
+
+  const refreshUserPackage = useCallback(() => {
+    if (user && !isDemoMode && isSupabaseConfigured()) {
+      fetchUserPackage(user.id);
+    }
+  }, [user, isDemoMode, fetchUserPackage]);
+
   return {
     user,
     session,
@@ -360,7 +373,7 @@ export function useAuth() {
     signOut,
     resetPassword,
     updateProfile,
-    refreshProfile: () => user && !isDemoMode && isSupabaseConfigured() && fetchProfile(user.id, true),
-    refreshUserPackage: () => user && !isDemoMode && isSupabaseConfigured() && fetchUserPackage(user.id),
+    refreshProfile,
+    refreshUserPackage,
   };
 }

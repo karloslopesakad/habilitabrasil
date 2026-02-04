@@ -149,7 +149,7 @@ export default function ConfiguraçõesPage() {
               value={siteData.name}
               onChange={(e) => setSiteData({ ...siteData, name: e.target.value })}
               className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-blue"
-              placeholder="HabilitaBrasil"
+              placeholder="FastCNH"
             />
           </div>
 
@@ -175,7 +175,7 @@ export default function ConfiguraçõesPage() {
               value={siteData.support_email}
               onChange={(e) => setSiteData({ ...siteData, support_email: e.target.value })}
               className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-blue"
-              placeholder="suporte@habilitabrasil.com"
+              placeholder="suporte@fastcnh.com"
             />
           </div>
 
@@ -198,5 +198,6 @@ export default function ConfiguraçõesPage() {
     </div>
   );
 }
+
 
 

@@ -1,5 +1,5 @@
 // ===========================================
-// HabilitaBrasil - Types do Banco de Dados
+// FastCNH - Types do Banco de Dados
 // ===========================================
 
 // Enums
@@ -128,6 +128,7 @@ export interface PracticalClass {
   // Relacionamentos
   instructor?: Instructor;
   step?: Step;
+  user?: Profile;
 }
 
 export interface UserPackage {

@@ -41,3 +41,4 @@ LEFT JOIN profiles p ON p.id = u.id
 WHERE u.email = 'seu-email@exemplo.com';
 
 
+

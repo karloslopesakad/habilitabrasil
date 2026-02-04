@@ -57,12 +57,12 @@ const faqs: FAQItem[] = [
       "Sim! Você pode fazer as aulas práticas e a prova em carro automático. Nossa CNH será válida apenas para veículos automáticos. Se quiser dirigir carros manuais no futuro, precisará fazer um curso de adaptação. Oferecemos o pacote Driver Auto especialmente para isso.",
   },
   {
-    question: "O HabilitaBrasil é um órgão oficial?",
+    question: "O FastCNH é um órgão oficial?",
     answer:
-      "Não, o HabilitaBrasil não é um órgão oficial. Somos uma plataforma de apoio e orientação que ajuda pessoas a entenderem e navegarem pelo processo de obtenção da CNH. Para informações oficiais, sempre consulte o DETRAN do seu estado. Nossos serviços são de consultoria e suporte educacional.",
+      "Não, o FastCNH não é um órgão oficial. Somos uma plataforma de apoio e orientação que ajuda pessoas a entenderem e navegarem pelo processo de obtenção da CNH. Para informações oficiais, sempre consulte o DETRAN do seu estado. Nossos serviços são de consultoria e suporte educacional.",
   },
   {
-    question: "Como funciona o suporte do HabilitaBrasil?",
+    question: "Como funciona o suporte do FastCNH?",
     answer:
       "Oferecemos diferentes níveis de suporte através de nossos pacotes. Desde orientações básicas gratuitas até consultoria personalizada, aulas preparatórias e suporte completo durante todo o processo. Você pode escolher o pacote que melhor se adequa às suas necessidades.",
   },

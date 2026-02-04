@@ -94,3 +94,4 @@ CREATE POLICY "Admins can manage states" ON states
 COMMENT ON TABLE states IS 'Tabela de estados brasileiros. Apenas estados com is_enabled=true estarão disponíveis no cadastro.';
 COMMENT ON COLUMN profiles.state_id IS 'Referência ao estado selecionado pelo usuário no cadastro.';
 
+

@@ -57,7 +57,7 @@ export default function AdminDashboard() {
       <div className="bg-gradient-to-r from-primary-blue to-primary-deep rounded-2xl p-6 text-white">
         <h2 className="text-2xl font-bold mb-2">Bem-vindo ao Painel Admin</h2>
         <p className="text-white/80">
-          Gerencie pacotes, etapas, aulas e instrutores da plataforma HabilitaBrasil.
+          Gerencie pacotes, etapas, aulas e instrutores da plataforma FastCNH.
         </p>
       </div>
 
@@ -202,5 +202,6 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
 
 

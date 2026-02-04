@@ -12,7 +12,7 @@ const DEMO_INSTRUCTORS: Instructor[] = [
     name: "Carlos Silva",
     phone: "11999999991",
     whatsapp: "5511999999991",
-    email: "carlos@habilitabrasil.com",
+    email: "carlos@fastcnh.com",
     specialization: "Aulas práticas - Manual e Automático",
     vehicle_types: ["manual", "automatic"],
     bio: "Instrutor certificado com mais de 10 anos de experiência.",
@@ -27,7 +27,7 @@ const DEMO_INSTRUCTORS: Instructor[] = [
     name: "Maria Santos",
     phone: "11999999992",
     whatsapp: "5511999999992",
-    email: "maria@habilitabrasil.com",
+    email: "maria@fastcnh.com",
     specialization: "Aulas teóricas e práticas",
     vehicle_types: ["manual"],
     bio: "Instrutora e professora de legislação de trânsito.",
@@ -318,6 +318,25 @@ export function usePracticalClassesAdmin() {
       .select("*, instructor:instructors(*)")
       .order("scheduled_at", { ascending: false });
 
+    // Buscar profiles dos usuários separadamente
+    if (!error && data && data.length > 0) {
+      const userIds = [...new Set(data.map((c: PracticalClass) => c.user_id))];
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, name")
+        .in("id", userIds);
+
+      // Criar mapa de profiles (sem email, pois não está na tabela profiles)
+      const profilesMap = new Map(
+        (profilesData || []).map((p: any) => [p.id, { ...p, email: null }])
+      );
+
+      // Adicionar profile a cada aula
+      data.forEach((cls: any) => {
+        cls.user = profilesMap.get(cls.user_id) || null;
+      });
+    }
+
     if (error) {
       setError(error.message);
     } else {
@@ -330,6 +349,37 @@ export function usePracticalClassesAdmin() {
   useEffect(() => {
     fetchClasses();
   }, [fetchClasses]);
+
+  const createClass = async (data: {
+    user_id: string;
+    step_id?: string | null;
+    instructor_id: string | null;
+    scheduled_at: string;
+    duration_minutes: number;
+    vehicle_type: VehicleType;
+    location?: string | null;
+    status?: ClassStatus;
+    notes?: string | null;
+  }) => {
+    if (!isSupabaseConfigured() || !supabase) {
+      return { data: null, error: new Error("Supabase não configurado") };
+    }
+
+    const { data: newClass, error } = await supabase
+      .from("practical_classes")
+      .insert({
+        ...data,
+        status: data.status || "scheduled",
+      })
+      .select("*, instructor:instructors(*)")
+      .single();
+
+    if (!error && newClass) {
+      setClasses((prev) => [newClass, ...prev]);
+    }
+
+    return { data: newClass, error };
+  };
 
   const updateClassStatus = async (id: string, status: ClassStatus, notes?: string) => {
     if (!isSupabaseConfigured() || !supabase) {
@@ -355,6 +405,7 @@ export function usePracticalClassesAdmin() {
     isLoading,
     error,
     refetch: fetchClasses,
+    createClass,
     updateClassStatus,
   };
 }

@@ -1,5 +1,5 @@
 -- ===========================================
--- HabilitaBrasil - Dados Iniciais (Seeds)
+-- FastCNH - Dados Iniciais (Seeds)
 -- Execute após o schema.sql
 -- ===========================================
 
@@ -165,7 +165,7 @@ INSERT INTO instructors (name, phone, whatsapp, email, specialization, vehicle_t
   'Carlos Silva',
   '11999999991',
   '5511999999991',
-  'carlos@habilitabrasil.com',
+  'carlos@fastcnh.com',
   'Aulas práticas - Manual e Automático',
   '{manual, automatic}',
   'Instrutor certificado com mais de 10 anos de experiência. Especialista em ensinar iniciantes com paciência e dedicação.'
@@ -174,7 +174,7 @@ INSERT INTO instructors (name, phone, whatsapp, email, specialization, vehicle_t
   'Maria Santos',
   '11999999992',
   '5511999999992',
-  'maria@habilitabrasil.com',
+  'maria@fastcnh.com',
   'Aulas teóricas e práticas',
   '{manual}',
   'Instrutora e professora de legislação de trânsito. Abordagem didática focada na aprovação.'
@@ -186,13 +186,14 @@ INSERT INTO instructors (name, phone, whatsapp, email, specialization, vehicle_t
 INSERT INTO settings (key, value, description) VALUES
 (
   'whatsapp_support',
-  '{"number": "5511999999999", "default_message": "Olá! Preciso de ajuda com meu processo de habilitação no HabilitaBrasil."}',
+  '{"number": "5511999999999", "default_message": "Olá! Preciso de ajuda com meu processo de habilitação no FastCNH."}',
   'Configurações do WhatsApp de suporte'
 ),
 (
   'site_info',
-  '{"name": "HabilitaBrasil", "tagline": "Seu caminho para a CNH começa aqui", "support_email": "suporte@habilitabrasil.com"}',
+  '{"name": "FastCNH", "tagline": "Seu caminho para a CNH começa aqui", "support_email": "suporte@fastcnh.com"}',
   'Informações gerais do site'
 );
+
 
 

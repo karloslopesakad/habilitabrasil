@@ -1,6 +1,7 @@
 "use client";
 
-import { Calendar, Clock, Car, User, MapPin } from "lucide-react";
+import { Calendar, Clock, Car, User, MapPin, Plus } from "lucide-react";
+import Link from "next/link";
 import { usePracticalClassesAdmin } from "@/hooks/usePracticalClasses";
 import { ClassStatus } from "@/types/database";
 
@@ -35,15 +36,23 @@ export default function AulasPráticasPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-primary-deep">Aulas Práticas</h2>
-          <p className="text-neutral-600">Visualize e gerencie as aulas práticas agendadas pelos alunos</p>
+          <p className="text-neutral-600">Agende e gerencie as aulas práticas dos alunos</p>
         </div>
+        <Link
+          href="/admin/aulas-praticas/nova"
+          className="inline-flex items-center space-x-2 bg-primary-blue text-white px-4 py-2 rounded-lg hover:bg-primary-deep transition-colors"
+        >
+          <Plus className="w-5 h-5" />
+          <span>Agendar Nova Aula</span>
+        </Link>
       </div>
 
       {/* Info */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-blue-800 text-sm">
-          As aulas práticas são agendadas pelos próprios alunos através do painel. Aqui você pode
-          visualizar todas as aulas e atualizar o status de cada uma.
+          As aulas práticas são agendadas pelo professor através deste painel. Os alunos podem visualizar
+          suas aulas agendadas na dashboard, mas não podem agendar diretamente. Para agendar, devem entrar
+          em contato pelo WhatsApp.
         </p>
       </div>
 
@@ -63,6 +72,9 @@ export default function AulasPráticasPage() {
             <table className="w-full">
               <thead className="bg-neutral-50 border-b border-neutral-200">
                 <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                    Aluno
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                     Data/Hora
                   </th>
@@ -85,6 +97,18 @@ export default function AulasPráticasPage() {
                   const status = statusConfig[cls.status];
                   return (
                     <tr key={cls.id} className="hover:bg-neutral-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {cls.user ? (
+                          <div>
+                            <div className="text-sm font-medium text-neutral-900">{cls.user.name || "Usuário sem nome"}</div>
+                            {cls.user.phone && (
+                              <div className="text-xs text-neutral-500">{cls.user.phone}</div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-neutral-400">-</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2 text-sm">
                           <Calendar className="w-4 h-4 text-neutral-400" />
@@ -151,5 +175,6 @@ export default function AulasPráticasPage() {
     </div>
   );
 }
+
 
 

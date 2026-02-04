@@ -1,5 +1,5 @@
 -- ===========================================
--- HabilitaBrasil - Schema do Supabase
+-- FastCNH - Schema do Supabase
 -- Execute este SQL no SQL Editor do Supabase
 -- ===========================================
 
@@ -61,10 +61,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+-- Criar trigger apenas se não existir
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'on_auth_user_created' 
+    AND tgrelid = 'auth.users'::regclass
+  ) THEN
+    CREATE TRIGGER on_auth_user_created
+      AFTER INSERT ON auth.users
+      FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+  END IF;
+END $$;
 
 -- ===========================================
 -- Tabela de Pacotes
@@ -276,20 +285,37 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
-CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-DROP TRIGGER IF EXISTS update_packages_updated_at ON packages;
-CREATE TRIGGER update_packages_updated_at BEFORE UPDATE ON packages FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-DROP TRIGGER IF EXISTS update_steps_updated_at ON steps;
-CREATE TRIGGER update_steps_updated_at BEFORE UPDATE ON steps FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-DROP TRIGGER IF EXISTS update_user_progress_updated_at ON user_progress;
-CREATE TRIGGER update_user_progress_updated_at BEFORE UPDATE ON user_progress FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-DROP TRIGGER IF EXISTS update_practical_classes_updated_at ON practical_classes;
-CREATE TRIGGER update_practical_classes_updated_at BEFORE UPDATE ON practical_classes FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-DROP TRIGGER IF EXISTS update_instructors_updated_at ON instructors;
-CREATE TRIGGER update_instructors_updated_at BEFORE UPDATE ON instructors FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-DROP TRIGGER IF EXISTS update_payments_updated_at ON payments;
-CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+-- Criar triggers apenas se não existirem
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_profiles_updated_at' AND tgrelid = 'profiles'::regclass) THEN
+    CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  END IF;
+  
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_packages_updated_at' AND tgrelid = 'packages'::regclass) THEN
+    CREATE TRIGGER update_packages_updated_at BEFORE UPDATE ON packages FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  END IF;
+  
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_steps_updated_at' AND tgrelid = 'steps'::regclass) THEN
+    CREATE TRIGGER update_steps_updated_at BEFORE UPDATE ON steps FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  END IF;
+  
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_user_progress_updated_at' AND tgrelid = 'user_progress'::regclass) THEN
+    CREATE TRIGGER update_user_progress_updated_at BEFORE UPDATE ON user_progress FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  END IF;
+  
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_practical_classes_updated_at' AND tgrelid = 'practical_classes'::regclass) THEN
+    CREATE TRIGGER update_practical_classes_updated_at BEFORE UPDATE ON practical_classes FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  END IF;
+  
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_instructors_updated_at' AND tgrelid = 'instructors'::regclass) THEN
+    CREATE TRIGGER update_instructors_updated_at BEFORE UPDATE ON instructors FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  END IF;
+  
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_payments_updated_at' AND tgrelid = 'payments'::regclass) THEN
+    CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  END IF;
+END $$;
 
 -- ===========================================
 -- Row Level Security (RLS)
@@ -308,11 +334,31 @@ ALTER TABLE class_registrations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 
+-- Criar função helper para verificar se usuário é admin (evita recursão)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 
+    FROM public.profiles 
+    WHERE id = auth.uid() 
+    AND role = 'admin'
+  );
+$$;
+
 -- Profiles: usuário vê/edita apenas o próprio
 DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+-- Admins podem ver todos os perfis
+DROP POLICY IF EXISTS "Admins can view all profiles" ON profiles;
+CREATE POLICY "Admins can view all profiles" ON profiles FOR SELECT USING (
+  public.is_admin()
+);
 
 -- Packages: público pode ver ativos
 DROP POLICY IF EXISTS "Packages are publicly viewable" ON packages;
@@ -425,11 +471,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_increment_practical_hours
-  AFTER UPDATE ON practical_classes
-  FOR EACH ROW
-  WHEN (NEW.status = 'completed' AND (OLD.status IS NULL OR OLD.status != 'completed'))
-  EXECUTE FUNCTION increment_practical_hours();
+-- Criar trigger apenas se não existir
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'trigger_increment_practical_hours' 
+    AND tgrelid = 'practical_classes'::regclass
+  ) THEN
+    CREATE TRIGGER trigger_increment_practical_hours
+      AFTER UPDATE ON practical_classes
+      FOR EACH ROW
+      WHEN (NEW.status = 'completed' AND (OLD.status IS NULL OR OLD.status != 'completed'))
+      EXECUTE FUNCTION increment_practical_hours();
+  END IF;
+END $$;
 
 -- Função para incrementar aulas teóricas usadas
 CREATE OR REPLACE FUNCTION increment_theoretical_classes()
@@ -449,12 +505,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS trigger_increment_theoretical_classes ON class_registrations;
-CREATE TRIGGER trigger_increment_theoretical_classes
-  AFTER UPDATE ON class_registrations
-  FOR EACH ROW
-  WHEN (NEW.attended = true AND (OLD.attended IS NULL OR OLD.attended = false))
-  EXECUTE FUNCTION increment_theoretical_classes();
+-- Criar trigger apenas se não existir
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'trigger_increment_theoretical_classes' 
+    AND tgrelid = 'class_registrations'::regclass
+  ) THEN
+    CREATE TRIGGER trigger_increment_theoretical_classes
+      AFTER UPDATE ON class_registrations
+      FOR EACH ROW
+      WHEN (NEW.attended = true AND (OLD.attended IS NULL OR OLD.attended = false))
+      EXECUTE FUNCTION increment_theoretical_classes();
+  END IF;
+END $$;
 
 -- Função para validar limites antes de agendar aula prática
 CREATE OR REPLACE FUNCTION validate_practical_class_limits()
@@ -506,11 +571,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS trigger_validate_practical_class_limits ON practical_classes;
-CREATE TRIGGER trigger_validate_practical_class_limits
-  BEFORE INSERT ON practical_classes
-  FOR EACH ROW
-  EXECUTE FUNCTION validate_practical_class_limits();
+-- Criar trigger apenas se não existir
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'trigger_validate_practical_class_limits' 
+    AND tgrelid = 'practical_classes'::regclass
+  ) THEN
+    CREATE TRIGGER trigger_validate_practical_class_limits
+      BEFORE INSERT ON practical_classes
+      FOR EACH ROW
+      EXECUTE FUNCTION validate_practical_class_limits();
+  END IF;
+END $$;
 
 -- Função para validar limites antes de se inscrever em aula teórica
 CREATE OR REPLACE FUNCTION validate_theoretical_class_limits()
@@ -560,11 +634,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS trigger_validate_theoretical_class_limits ON class_registrations;
-CREATE TRIGGER trigger_validate_theoretical_class_limits
-  BEFORE INSERT ON class_registrations
-  FOR EACH ROW
-  EXECUTE FUNCTION validate_theoretical_class_limits();
+-- Criar trigger apenas se não existir
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger 
+    WHERE tgname = 'trigger_validate_theoretical_class_limits' 
+    AND tgrelid = 'class_registrations'::regclass
+  ) THEN
+    CREATE TRIGGER trigger_validate_theoretical_class_limits
+      BEFORE INSERT ON class_registrations
+      FOR EACH ROW
+      EXECUTE FUNCTION validate_theoretical_class_limits();
+  END IF;
+END $$;
 
 -- ===========================================
 -- FIM DO SCHEMA

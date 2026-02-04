@@ -23,7 +23,7 @@ const platformSteps = [
     number: 1,
     title: "Cadastre-se na Plataforma",
     description:
-      "Crie sua conta gratuita no HabilitaBrasil. O cadastro é simples e rápido, e você terá acesso imediato à plataforma.",
+      "Crie sua conta gratuita no FastCNH. O cadastro é simples e rápido, e você terá acesso imediato à plataforma.",
     icon: UserPlus,
     highlight: "Grátis e sem compromisso",
   },
@@ -109,7 +109,7 @@ export default function ComoFunciona() {
               Como Funciona a Plataforma
             </h1>
             <p className="text-xl text-white/90 max-w-3xl">
-              O HabilitaBrasil te acompanha em todo o processo de habilitação.
+              O FastCNH te acompanha em todo o processo de habilitação.
               Desde o cadastro até a conquista da sua CNH, com instruções claras
               e suporte de instrutores especializados.
             </p>

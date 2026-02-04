@@ -22,20 +22,44 @@ export function useSimulation() {
       setError(null);
 
       try {
-        // Usar a função do banco para buscar questões balanceadas
-        const { data, error: dbError } = await supabase.rpc("get_balanced_questions", {
+        // Primeiro, tentar usar a função RPC do banco
+        const { data: rpcData, error: rpcError } = await supabase.rpc("get_balanced_questions", {
           p_count: count,
           p_user_id: userId || null,
         });
 
-        if (dbError) {
-          setError(dbError.message);
+        // Se a função RPC funcionou e retornou dados
+        if (!rpcError && rpcData && rpcData.length > 0) {
           setIsLoading(false);
-          return { data: null, error: dbError };
+          return { data: rpcData as SimulationQuestion[], error: null };
+        }
+
+        // Se a função RPC falhou ou não retornou dados, buscar diretamente da tabela
+        console.log("RPC não retornou dados, buscando diretamente da tabela...");
+        
+        const { data: directData, error: directError } = await supabase
+          .from("simulation_questions")
+          .select("*")
+          .limit(count)
+          .order("random()", { ascending: false });
+
+        if (directError) {
+          console.error("Erro ao buscar questões diretamente:", directError);
+          setError(directError.message || "Erro ao buscar questões");
+          setIsLoading(false);
+          return { data: null, error: directError };
+        }
+
+        if (!directData || directData.length === 0) {
+          const errorMsg = "Nenhuma questão encontrada no banco de dados. Por favor, cadastre questões primeiro.";
+          console.error(errorMsg);
+          setError(errorMsg);
+          setIsLoading(false);
+          return { data: null, error: new Error(errorMsg) };
         }
 
         setIsLoading(false);
-        return { data: data as SimulationQuestion[], error: null };
+        return { data: directData as SimulationQuestion[], error: null };
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Erro ao buscar questões";
         setError(errorMessage);

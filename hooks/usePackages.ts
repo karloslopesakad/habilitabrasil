@@ -288,15 +288,67 @@ export function usePackagesAdmin() {
     return { data, error };
   };
 
-  const deletePackage = async (id: string) => {
+  const deletePackage = async (id: string, forceDelete: boolean = false) => {
     if (!isSupabaseConfigured() || !supabase) {
       return { error: new Error("Supabase não configurado") };
     }
 
+    // Primeiro, tentar soft delete (marcar como inativo)
+    if (!forceDelete) {
+      const { data: updatedData, error: updateError } = await supabase
+        .from("packages")
+        .update({ is_active: false })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (!updateError && updatedData) {
+        setPackages((prev) =>
+          prev.map((p) => (p.id === id ? updatedData : p))
+        );
+        return { error: null };
+      }
+
+      // Se soft delete falhou por foreign key, retornar erro específico
+      if (updateError && (updateError.code === "23503" || updateError.message.includes("foreign key"))) {
+        return {
+          error: new Error(
+            "Este pacote está sendo usado por usuários. Ele foi marcado como inativo. Para deletar permanentemente, execute o script SQL fix-package-deletion.sql no Supabase."
+          ),
+        };
+      }
+    }
+
+    // Se forceDelete ou se soft delete falhou por outro motivo, tentar deletar fisicamente
+    // Primeiro, tentar usar a função SQL de cascade (se existir)
+    try {
+      const { error: functionError } = await supabase.rpc("delete_package_cascade", {
+        package_uuid: id,
+      });
+
+      if (!functionError) {
+        setPackages((prev) => prev.filter((p) => p.id !== id));
+        return { error: null };
+      }
+    } catch (rpcError) {
+      // Função RPC não existe, continuar com deleção direta
+    }
+
+    // Tentar deletar diretamente (pode falhar se não houver CASCADE configurado)
     const { error } = await supabase.from("packages").delete().eq("id", id);
 
     if (!error) {
       setPackages((prev) => prev.filter((p) => p.id !== id));
+      return { error: null };
+    }
+
+    // Se ainda falhou, verificar se é erro de foreign key
+    if (error.code === "23503" || error.message.includes("foreign key")) {
+      return {
+        error: new Error(
+          "Este pacote não pode ser deletado porque está sendo usado por usuários. Execute o script SQL 'fix-package-deletion.sql' no Supabase para habilitar deleção em cascata, ou use soft delete (marcar como inativo)."
+        ),
+      };
     }
 
     return { error };

@@ -1,4 +1,4 @@
-# HabilitaBrasil
+# FastCNH
 
 Plataforma de apoio para obtenção da CNH (Carteira Nacional de Habilitação) com acompanhamento de instrutores especializados.
 

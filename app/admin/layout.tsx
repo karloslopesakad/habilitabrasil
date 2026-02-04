@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -72,12 +72,14 @@ export default function AdminLayout({
   const { user, profile, signOut, isLoading, refreshProfile } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Forçar refresh do profile ao montar para garantir que está atualizado
+  // Forçar refresh do profile apenas uma vez ao montar (não em loop)
+  const hasRefreshed = useRef(false);
   useEffect(() => {
-    if (user && !isLoading) {
+    if (user && !isLoading && !hasRefreshed.current) {
+      hasRefreshed.current = true;
       refreshProfile();
     }
-  }, [user, isLoading, refreshProfile]);
+  }, [user, isLoading]); // Removido refreshProfile das dependências
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -133,7 +135,7 @@ export default function AdminLayout({
               </div>
               <div>
                 <span className="font-display font-bold text-white text-lg">
-                  HabilitaBrasil
+                  FastCNH
                 </span>
                 <span className="block text-xs text-white/60">Painel Admin</span>
               </div>

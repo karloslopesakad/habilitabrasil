@@ -45,7 +45,7 @@ export default function Benefits() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-display font-bold text-primary-deep mb-4">
-            Para que serve o HabilitaBrasil?
+            Para que serve o FastCNH?
           </h2>
           <p className="text-xl text-neutral-600 max-w-2xl mx-auto mb-6">
             Receba instruções para todo seu processo de habilitação através de instrutores especializados.

@@ -83,3 +83,4 @@ export default function Timer({ initialSeconds, onTimeUp, onTick }: TimerProps) 
   );
 }
 
+
