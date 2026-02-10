@@ -39,9 +39,18 @@ NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-anon-key-aqui
 SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key-aqui
 
-# Stripe Configuration
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
+# Mercado Pago Configuration
+MERCADOPAGO_ACCESS_TOKEN=TEST-xxxxx-xxxxx-xxxxx
+# Obtenha seu Access Token em: https://www.mercadopago.com.br/developers/panel/credentials
+# Use TEST-xxx para ambiente de testes e APP_USR-xxx para produção
+MERCADOPAGO_WEBHOOK_SECRET=your_webhook_secret_here
+# Obtenha seu Webhook Secret em: https://www.mercadopago.com.br/developers/panel/app
+# Vá em "Suas integrações" > Selecione sua aplicação > "Notificações" > "Webhooks"
+# Copie a "Chave secreta" (Secret Key) e cole aqui
+# IMPORTANTE: Sem esta chave, as notificações não serão verificadas (não recomendado em produção)
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+# URL base da aplicação (necessária para webhooks)
+# Em produção, use sua URL real: https://seu-dominio.com
 
 # WhatsApp Support
 NEXT_PUBLIC_WHATSAPP_NUMBER=5511999999999
@@ -59,7 +68,9 @@ NEXT_PUBLIC_WHATSAPP_MESSAGE=Olá! Preciso de ajuda com meu processo de habilita
 2. Execute o conteúdo do arquivo `supabase/setup-payments.sql` para adicionar suporte a pagamentos
    - Este script é idempotente e pode ser executado múltiplas vezes sem problemas
    - Inclui verificações automáticas ao final
-3. Execute o conteúdo do arquivo `supabase/seed.sql` para inserir dados iniciais (opcional)
+3. Execute o conteúdo do arquivo `supabase/migrations/add-mercadopago-fields.sql` para adicionar campos do Mercado Pago
+   - Este script adiciona colunas para armazenar IDs do Mercado Pago
+4. Execute o conteúdo do arquivo `supabase/seed.sql` para inserir dados iniciais (opcional)
 
 ### 4. Criar usuário admin
 

@@ -11,7 +11,14 @@ import { CheckCircle, ArrowRight, Package } from "lucide-react";
 function SuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session_id");
+  // O Mercado Pago envia preference_id e payment_id como query parameters
+  const preferenceId = searchParams.get("preference_id");
+  const paymentId = searchParams.get("payment_id") || searchParams.get("payment_id");
+  
+  // Também pode vir como collection_id (ID do pagamento)
+  const collectionId = searchParams.get("collection_id");
+  const collectionStatus = searchParams.get("collection_status");
+  const status = searchParams.get("status");
   const { user, refreshUserPackage, refreshProfile } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(true);
 
@@ -82,9 +89,11 @@ function SuccessContent() {
               </Link>
             </div>
 
-            {sessionId && (
+            {(preferenceId || paymentId || collectionId) && (
               <p className="text-xs text-neutral-500 mt-6">
-                ID da Sessão: {sessionId}
+                {preferenceId && `Preferência: ${preferenceId}`}
+                {(paymentId || collectionId) && ` | Pagamento: ${paymentId || collectionId}`}
+                {status && ` | Status: ${status}`}
               </p>
             )}
           </div>

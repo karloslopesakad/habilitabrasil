@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { createCheckoutSession } from '@/lib/stripe';
+import { createPaymentPreference } from '@/lib/mercadopago';
 import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
@@ -43,13 +43,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Buscar pacote
-    const { data: packageData, error: packageError } = await supabase
-      .from('packages')
-      .select('*')
-      .eq('id', package_id)
-      .eq('is_active', true)
-      .single();
+    // Buscar pacote e perfil do usuário
+    const [packageResult, profileResult] = await Promise.all([
+      supabase
+        .from('packages')
+        .select('*')
+        .eq('id', package_id)
+        .eq('is_active', true)
+        .single(),
+      supabase
+        .from('profiles')
+        .select('name')
+        .eq('id', user.id)
+        .single(),
+    ]);
+
+    const { data: packageData, error: packageError } = packageResult;
+    const { data: profileData } = profileResult;
 
     if (packageError || !packageData) {
       return NextResponse.json(
@@ -58,29 +68,47 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validar se Stripe está configurado
-    if (!process.env.STRIPE_SECRET_KEY) {
+    // Extrair primeiro e último nome do perfil
+    let firstName = '';
+    let lastName = '';
+    if (profileData?.name) {
+      const nameParts = profileData.name.trim().split(/\s+/);
+      firstName = nameParts[0] || '';
+      lastName = nameParts.slice(1).join(' ') || '';
+    }
+
+    // Validar se Mercado Pago está configurado
+    if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
       return NextResponse.json(
-        { error: 'Stripe não está configurado' },
+        { error: 'Mercado Pago não está configurado' },
         { status: 500 }
       );
     }
 
-    // Criar checkout session
+    // Criar preferência de pagamento
     const baseUrl = request.nextUrl.origin;
-    const session = await createCheckoutSession({
+    const preference = await createPaymentPreference({
       packageId: packageData.id,
       packageName: packageData.name,
       packagePrice: Number(packageData.price),
       userId: user.id,
       userEmail: user.email!,
-      successUrl: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      firstName: firstName,
+      lastName: lastName,
+      successUrl: `${baseUrl}/checkout/success`,
       cancelUrl: `${baseUrl}/checkout/cancel?package_id=${package_id}`,
+      failureUrl: `${baseUrl}/checkout/cancel?package_id=${package_id}`,
+      pendingUrl: `${baseUrl}/checkout/pending`,
     });
 
-    return NextResponse.json({ url: session.url });
+    // Retornar URL de pagamento (usa sandbox_init_point em desenvolvimento, init_point em produção)
+    const paymentUrl = process.env.NODE_ENV === 'production' 
+      ? preference.init_point 
+      : preference.sandbox_init_point || preference.init_point;
+
+    return NextResponse.json({ url: paymentUrl, preference_id: preference.id });
   } catch (error: any) {
-    console.error('Erro ao criar checkout session:', error);
+    console.error('Erro ao criar preferência de pagamento:', error);
     return NextResponse.json(
       { error: error.message || 'Erro ao processar pagamento' },
       { status: 500 }

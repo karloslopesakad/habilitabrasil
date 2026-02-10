@@ -182,6 +182,47 @@ function CheckoutContent() {
               </div>
             </div>
 
+            {/* Métodos de Pagamento */}
+            {packageData.price > 0 && (
+              <div className="bg-primary-blue/5 border border-primary-blue/20 rounded-lg p-6 mb-6">
+                <h3 className="text-lg font-semibold text-primary-deep mb-4">
+                  Métodos de Pagamento Disponíveis
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-neutral-900">Cartão de Crédito</p>
+                      <p className="text-sm text-neutral-600">
+                        Parcelamento em até 12x sem juros (conforme disponibilidade da bandeira).
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-neutral-900">PIX</p>
+                      <p className="text-sm text-neutral-600">
+                        Pagamento instantâneo com QR Code. Aprovação imediata.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-neutral-900">Boleto Bancário</p>
+                      <p className="text-sm text-neutral-600">
+                        Gere um boleto e pague em qualquer banco ou lotérica. Vencimento em até 3 dias úteis.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-neutral-500 mt-4">
+                  Você será redirecionado para a página segura do Mercado Pago para finalizar o pagamento.
+                </p>
+              </div>
+            )}
+
             {/* Botão de Pagamento */}
             {packageData.price > 0 ? (
               <button
@@ -211,7 +252,7 @@ function CheckoutContent() {
             )}
 
             <p className="text-xs text-neutral-500 text-center mt-4">
-              Ao continuar, você será redirecionado para a página de pagamento seguro do Stripe.
+              Ao continuar, você será redirecionado para a página de pagamento seguro do Mercado Pago.
             </p>
           </div>
         </div>
