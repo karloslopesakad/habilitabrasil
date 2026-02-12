@@ -94,6 +94,7 @@ export default function PagamentosPage() {
             return (
               user?.name?.toLowerCase().includes(searchLower) ||
               pkg?.name?.toLowerCase().includes(searchLower) ||
+              payment.mercadopago_payment_id?.toLowerCase().includes(searchLower) ||
               payment.stripe_checkout_session_id?.toLowerCase().includes(searchLower) ||
               payment.user_id?.toLowerCase().includes(searchLower)
             );
@@ -275,7 +276,7 @@ export default function PagamentosPage() {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                    ID Stripe
+                    ID Pagamento
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                     Ações
@@ -316,7 +317,7 @@ export default function PagamentosPage() {
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-xs text-neutral-500 font-mono truncate max-w-xs">
-                          {payment.stripe_checkout_session_id || "N/A"}
+                          {payment.mercadopago_payment_id || payment.stripe_checkout_session_id || "N/A"}
                         </p>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">

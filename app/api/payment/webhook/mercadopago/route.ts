@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { sendPaymentNotification } from '@/lib/email';
 
 // Desabilitar body parsing padrão do Next.js para webhooks
 export const runtime = 'nodejs';
@@ -273,6 +274,36 @@ async function handlePayment(paymentId: string) {
             theoretical_classes_used: 0,
             simulations_used: 0,
           });
+
+        // Enviar notificação por email ao admin
+        const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
+        if (adminEmail) {
+          // Buscar nome do pacote
+          const { data: packageData } = await supabaseAdmin
+            .from('packages')
+            .select('name')
+            .eq('id', packageId)
+            .single();
+
+          // Buscar nome do usuário
+          const { data: userData } = await supabaseAdmin
+            .from('profiles')
+            .select('name')
+            .eq('id', userId)
+            .single();
+
+          await sendPaymentNotification({
+            adminEmail,
+            userName: userData?.name || payment.payer?.first_name || 'Cliente',
+            userEmail: payment.payer?.email || 'N/A',
+            packageName: packageData?.name || 'Pacote',
+            amount: payment.transaction_amount || 0,
+            currency: payment.currency_id || 'BRL',
+            paymentId: paymentId,
+            paymentMethod: payment.payment_type_id,
+            installments: payment.installments,
+          });
+        }
       }
     }
 

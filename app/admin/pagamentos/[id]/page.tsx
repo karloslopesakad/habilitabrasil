@@ -284,53 +284,47 @@ function PaymentDetailContent() {
         </div>
       </div>
 
-      {/* Informações do Stripe */}
+      {/* Informações do Pagamento */}
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
         <div className="flex items-center space-x-3 mb-4">
           <CreditCard className="w-5 h-5 text-primary-blue" />
           <h3 className="text-lg font-semibold text-primary-deep">
-            Informações do Stripe
+            Informações do Pagamento
           </h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-neutral-600 mb-1">
-              Checkout Session ID
+              ID Pagamento (Mercado Pago)
             </p>
-            <div className="flex items-center space-x-2">
-              <p className="font-mono text-sm text-neutral-700 break-all">
-                {payment.stripe_checkout_session_id || "N/A"}
-              </p>
-              {payment.stripe_checkout_session_id && (
-                <a
-                  href={`https://dashboard.stripe.com/test/checkout/sessions/${payment.stripe_checkout_session_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-blue hover:text-primary-deep"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              )}
-            </div>
+            <p className="font-mono text-sm text-neutral-700 break-all">
+              {payment.mercadopago_payment_id || "N/A"}
+            </p>
           </div>
           <div>
-            <p className="text-sm text-neutral-600 mb-1">Payment Intent ID</p>
-            <div className="flex items-center space-x-2">
-              <p className="font-mono text-sm text-neutral-700 break-all">
-                {payment.stripe_payment_intent_id || "N/A"}
-              </p>
-              {payment.stripe_payment_intent_id && (
-                <a
-                  href={`https://dashboard.stripe.com/test/payments/${payment.stripe_payment_intent_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary-blue hover:text-primary-deep"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              )}
-            </div>
+            <p className="text-sm text-neutral-600 mb-1">ID Preferência</p>
+            <p className="font-mono text-sm text-neutral-700 break-all">
+              {payment.mercadopago_preference_id || "N/A"}
+            </p>
           </div>
+          {payment.stripe_checkout_session_id && (
+            <div>
+              <p className="text-sm text-neutral-600 mb-1">
+                Checkout Session ID (Stripe - legado)
+              </p>
+              <p className="font-mono text-sm text-neutral-700 break-all">
+                {payment.stripe_checkout_session_id}
+              </p>
+            </div>
+          )}
+          {payment.stripe_payment_intent_id && (
+            <div>
+              <p className="text-sm text-neutral-600 mb-1">Payment Intent ID (Stripe - legado)</p>
+              <p className="font-mono text-sm text-neutral-700 break-all">
+                {payment.stripe_payment_intent_id}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

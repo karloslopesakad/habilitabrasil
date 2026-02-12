@@ -216,6 +216,9 @@ export interface Payment {
   package_id: string;
   stripe_payment_intent_id: string | null;
   stripe_checkout_session_id: string | null;
+  mercadopago_payment_id: string | null;
+  mercadopago_preference_id: string | null;
+  mercadopago_order_id: string | null;
   amount: number;
   currency: string;
   status: 'succeeded' | 'pending' | 'failed' | 'refunded';
