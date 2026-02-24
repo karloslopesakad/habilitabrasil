@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar autenticação
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -68,6 +67,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // REGRA: Pacotes sem horas práticas (ex: Básico) só podem ser comprados 1 vez
+    if (packageData.practical_hours === 0 && packageData.price > 0) {
+      const { data: existingPurchases } = await supabase
+        .from('user_packages')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('package_id', package_id);
+
+      if (existingPurchases && existingPurchases.length > 0) {
+        return NextResponse.json(
+          { error: 'Você já adquiriu este pacote. Pacotes sem aulas práticas só podem ser comprados uma vez.' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Extrair primeiro e último nome do perfil
     let firstName = '';
     let lastName = '';
@@ -77,7 +92,6 @@ export async function POST(request: NextRequest) {
       lastName = nameParts.slice(1).join(' ') || '';
     }
 
-    // Validar se Mercado Pago está configurado
     if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
       return NextResponse.json(
         { error: 'Mercado Pago não está configurado' },
@@ -85,7 +99,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Criar preferência de pagamento
     const baseUrl = request.nextUrl.origin;
     const preference = await createPaymentPreference({
       packageId: packageData.id,
@@ -101,7 +114,6 @@ export async function POST(request: NextRequest) {
       pendingUrl: `${baseUrl}/checkout/pending`,
     });
 
-    // Retornar URL de pagamento (usa sandbox_init_point em desenvolvimento, init_point em produção)
     const paymentUrl = process.env.NODE_ENV === 'production' 
       ? preference.init_point 
       : preference.sandbox_init_point || preference.init_point;

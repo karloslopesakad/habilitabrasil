@@ -95,3 +95,5 @@ COMMENT ON TABLE states IS 'Tabela de estados brasileiros. Apenas estados com is
 COMMENT ON COLUMN profiles.state_id IS 'Referência ao estado selecionado pelo usuário no cadastro.';
 
 
+
+

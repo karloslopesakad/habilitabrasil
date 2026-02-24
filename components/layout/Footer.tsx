@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Facebook, Instagram, Linkedin, Mail, AlertCircle } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Mail, AlertCircle, MessageCircle } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -86,12 +86,15 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/assistente"
-                  className="text-white/70 hover:text-white transition-colors"
+                <a
+                  href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5511999999999"}?text=${encodeURIComponent("Olá! Preciso de ajuda com meu processo de habilitação.")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/70 hover:text-white transition-colors inline-flex items-center space-x-1"
                 >
-                  Suporte
-                </Link>
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span>Suporte via WhatsApp</span>
+                </a>
               </li>
             </ul>
           </div>

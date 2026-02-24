@@ -27,6 +27,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userPackage, setUserPackage] = useState<UserPackage | null>(null);
+  const [allUserPackages, setAllUserPackages] = useState<UserPackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
 
@@ -65,22 +66,27 @@ export function useAuth() {
     if (!client || !isSupabaseConfigured()) return;
     
     try {
-      const { data, error } = await client
+      // Buscar TODOS os pacotes ativos do usuário (para cálculo cumulativo)
+      const { data: allPackages, error } = await client
         .from("user_packages")
         .select("*, package:packages(*)")
         .eq("user_id", userId)
         .eq("status", "active")
-        .maybeSingle();
+        .order("purchased_at", { ascending: false });
       
       if (error && error.code !== 'PGRST116') {
-        console.error('Erro ao buscar pacote do usuário:', error);
+        console.error('Erro ao buscar pacotes do usuário:', error);
       }
       
-      // Se não tem pacote, define como null (usuário no plano free)
-      setUserPackage(data || null);
+      const packages = allPackages || [];
+      setAllUserPackages(packages);
+      
+      // O userPackage principal é o mais recente (para exibição de plano)
+      setUserPackage(packages.length > 0 ? packages[0] : null);
     } catch (err) {
-      console.error('Erro ao buscar pacote do usuário:', err);
+      console.error('Erro ao buscar pacotes do usuário:', err);
       setUserPackage(null);
+      setAllUserPackages([]);
     }
   }, []); // Removido supabase da dependência para evitar loops
 
@@ -317,16 +323,33 @@ export function useAuth() {
   const hasWhatsappSupport = userPackage?.package?.has_whatsapp_support ?? false;
   const hasInstructorSupport = userPackage?.package?.has_instructor_support ?? false;
   
-  const practicalHoursRemaining = 
-    (userPackage?.package?.practical_hours ?? 0) - (userPackage?.practical_hours_used ?? 0);
-  
-  const theoreticalClassesRemaining = 
-    (userPackage?.package?.theoretical_classes_included ?? 0) - (userPackage?.theoretical_classes_used ?? 0);
-  
-  const simulationsRemaining = 
-    (userPackage?.package?.simulations_included ?? 0) === -1
-      ? Infinity
-      : (userPackage?.package?.simulations_included ?? 0) - (userPackage?.simulations_used ?? 0);
+  // Calcular horas/aulas CUMULATIVAS somando TODOS os pacotes ativos
+  const totalPracticalHours = allUserPackages.reduce(
+    (sum, pkg) => sum + (pkg.package?.practical_hours ?? 0), 0
+  );
+  const totalPracticalHoursUsed = allUserPackages.reduce(
+    (sum, pkg) => sum + (pkg.practical_hours_used ?? 0), 0
+  );
+  const practicalHoursRemaining = totalPracticalHours - totalPracticalHoursUsed;
+
+  const totalTheoreticalClasses = allUserPackages.reduce(
+    (sum, pkg) => sum + (pkg.package?.theoretical_classes_included ?? 0), 0
+  );
+  const totalTheoreticalClassesUsed = allUserPackages.reduce(
+    (sum, pkg) => sum + (pkg.theoretical_classes_used ?? 0), 0
+  );
+  const theoreticalClassesRemaining = totalTheoreticalClasses - totalTheoreticalClassesUsed;
+
+  const hasUnlimitedSimulations = allUserPackages.some(
+    pkg => (pkg.package?.simulations_included ?? 0) === -1
+  );
+  const totalSimulations = hasUnlimitedSimulations 
+    ? Infinity 
+    : allUserPackages.reduce((sum, pkg) => sum + (pkg.package?.simulations_included ?? 0), 0);
+  const totalSimulationsUsed = allUserPackages.reduce(
+    (sum, pkg) => sum + (pkg.simulations_used ?? 0), 0
+  );
+  const simulationsRemaining = hasUnlimitedSimulations ? Infinity : totalSimulations - totalSimulationsUsed;
 
   const userContext: UserContext = {
     user: user ? { id: user.id, email: user.email! } : null,
@@ -359,6 +382,7 @@ export function useAuth() {
     session,
     profile,
     userPackage,
+    allUserPackages,
     userContext,
     isLoading,
     isDemoMode,
@@ -368,6 +392,8 @@ export function useAuth() {
     practicalHoursRemaining,
     theoreticalClassesRemaining,
     simulationsRemaining,
+    totalPracticalHours,
+    totalPracticalHoursUsed,
     signIn,
     signUp,
     signOut,

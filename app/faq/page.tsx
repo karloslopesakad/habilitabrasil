@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { ChevronDown, HelpCircle } from "lucide-react";
+import { ChevronDown, HelpCircle, MessageCircle } from "lucide-react";
 
 interface FAQItem {
   question: string;
@@ -146,10 +146,13 @@ export default function FAQPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="/assistente"
-                className="inline-block bg-primary-blue text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-primary-deep transition-all shadow-md hover:shadow-lg"
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5511999999999"}?text=${encodeURIComponent("Olá! Tenho dúvidas sobre o processo de habilitação.")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center space-x-2 bg-green-500 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-green-600 transition-all shadow-md hover:shadow-lg"
               >
-                Falar com Assistente
+                <MessageCircle className="w-5 h-5" />
+                <span>Falar no WhatsApp</span>
               </a>
               <a
                 href="/pacotes"

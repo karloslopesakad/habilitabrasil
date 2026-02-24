@@ -30,12 +30,15 @@ function DashboardContent() {
     user,
     profile,
     userPackage,
+    allUserPackages,
     isLoading: authLoading,
     isPaying,
     hasWhatsappSupport,
     practicalHoursRemaining,
     theoreticalClassesRemaining,
     simulationsRemaining,
+    totalPracticalHours,
+    totalPracticalHoursUsed,
   } = useAuth();
 
   const { steps, isLoading: stepsLoading } = useSteps();
@@ -298,29 +301,47 @@ function DashboardContent() {
                       <p className="text-sm text-neutral-600">
                         {userPackage.package?.description}
                       </p>
+
+                      {/* Horas práticas cumulativas */}
+                      {totalPracticalHours > 0 && (
+                        <div className="mt-3 bg-white rounded-lg p-3 border border-primary-blue/20">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-semibold text-primary-deep">Aulas Práticas</span>
+                            <span className="text-sm font-bold text-primary-blue">
+                              {practicalHoursRemaining}h disponíveis
+                            </span>
+                          </div>
+                          <div className="w-full bg-neutral-200 rounded-full h-2.5 mb-1">
+                            <div
+                              className="bg-primary-blue h-2.5 rounded-full transition-all"
+                              style={{ width: `${Math.min(100, (totalPracticalHoursUsed / totalPracticalHours) * 100)}%` }}
+                            ></div>
+                          </div>
+                          <p className="text-xs text-neutral-500">
+                            {totalPracticalHoursUsed}h usadas de {totalPracticalHours}h totais
+                            {allUserPackages && allUserPackages.length > 1 && (
+                              <span className="text-primary-blue"> ({allUserPackages.filter(p => (p.package?.practical_hours ?? 0) > 0).length} pacotes acumulados)</span>
+                            )}
+                          </p>
+                        </div>
+                      )}
+
                       <div className="mt-2 text-xs text-neutral-500 space-y-1">
-                        {userPackage.package?.practical_hours && userPackage.package.practical_hours > 0 && (
+                        {theoreticalClassesRemaining > 0 && (
                           <p>
-                            Aulas práticas: {userPackage.practical_hours_used}h /{" "}
-                            {userPackage.package.practical_hours}h
+                            Aulas teóricas disponíveis: <strong>{theoreticalClassesRemaining}</strong>
                           </p>
                         )}
-                        {userPackage.package?.theoretical_classes_included &&
-                          userPackage.package.theoretical_classes_included > 0 && (
-                            <p>
-                              Aulas teóricas: {userPackage.theoretical_classes_used} /{" "}
-                              {userPackage.package.theoretical_classes_included}
-                            </p>
-                          )}
-                        {userPackage.package?.simulations_included &&
-                          (userPackage.package.simulations_included > 0 || userPackage.package.simulations_included === -1) && (
-                            <p>
-                              Simulados: {userPackage.simulations_used} /{" "}
-                              {userPackage.package.simulations_included === -1 
-                                ? "Ilimitados" 
-                                : userPackage.package.simulations_included}
-                            </p>
-                          )}
+                        {simulationsRemaining > 0 && (
+                          <p>
+                            Simulados disponíveis: <strong>{simulationsRemaining === Infinity ? "Ilimitados" : simulationsRemaining}</strong>
+                          </p>
+                        )}
+                        {userPackage.expires_at && (
+                          <p className="text-neutral-400">
+                            Expira em: {new Date(userPackage.expires_at).toLocaleDateString("pt-BR")}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ) : (

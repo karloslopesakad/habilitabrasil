@@ -45,3 +45,5 @@ COMMENT ON COLUMN payments.mercadopago_payment_id IS 'ID do pagamento no Mercado
 COMMENT ON COLUMN payments.mercadopago_preference_id IS 'ID da preferência de pagamento no Mercado Pago';
 COMMENT ON COLUMN payments.mercadopago_order_id IS 'ID do pedido (merchant_order) no Mercado Pago';
 
+
+

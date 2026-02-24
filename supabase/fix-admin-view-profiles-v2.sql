@@ -39,3 +39,5 @@ USING (public.is_admin());
 -- Execute esta query para testar (substitua pelo seu user_id de admin):
 -- SELECT public.is_admin();
 
+
+

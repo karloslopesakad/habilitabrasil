@@ -254,26 +254,62 @@ async function handlePayment(paymentId: string) {
 
       // Se o pagamento foi aprovado, ativar o pacote do usuário
       if (status === 'succeeded' && newPayment) {
-        // Desativar pacotes anteriores
-        await supabaseAdmin
-          .from('user_packages')
-          .update({ status: 'expired' })
-          .eq('user_id', userId)
-          .eq('status', 'active');
+        // Buscar dados do pacote comprado
+        const { data: pkgData } = await supabaseAdmin
+          .from('packages')
+          .select('practical_hours, theoretical_classes_included, simulations_included')
+          .eq('id', packageId)
+          .single();
 
-        // Criar novo user_package
-        await supabaseAdmin
-          .from('user_packages')
-          .insert({
-            user_id: userId,
-            package_id: packageId,
-            status: 'active',
-            payment_id: newPayment.id,
-            purchased_at: new Date().toISOString(),
-            practical_hours_used: 0,
-            theoretical_classes_used: 0,
-            simulations_used: 0,
-          });
+        const hasPracticalHours = (pkgData?.practical_hours ?? 0) > 0;
+
+        if (hasPracticalHours) {
+          // PACOTES COM HORAS PRÁTICAS: cumulativo
+          // NÃO desativar pacotes anteriores - as horas se somam
+          // Criar novo user_package com as horas do pacote
+          const expiresAt = new Date();
+          expiresAt.setFullYear(expiresAt.getFullYear() + 2); // 2 anos para usar as horas
+
+          await supabaseAdmin
+            .from('user_packages')
+            .insert({
+              user_id: userId,
+              package_id: packageId,
+              status: 'active',
+              payment_id: newPayment.id,
+              purchased_at: new Date().toISOString(),
+              expires_at: expiresAt.toISOString(),
+              practical_hours_used: 0,
+              theoretical_classes_used: 0,
+              simulations_used: 0,
+            });
+        } else {
+          // PACOTES SEM HORAS PRÁTICAS (básico): compra única, expira em 1 ano
+          // Desativar pacotes básicos anteriores
+          await supabaseAdmin
+            .from('user_packages')
+            .update({ status: 'expired' })
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .eq('package_id', packageId);
+
+          const expiresAt = new Date();
+          expiresAt.setFullYear(expiresAt.getFullYear() + 1); // 1 ano
+
+          await supabaseAdmin
+            .from('user_packages')
+            .insert({
+              user_id: userId,
+              package_id: packageId,
+              status: 'active',
+              payment_id: newPayment.id,
+              purchased_at: new Date().toISOString(),
+              expires_at: expiresAt.toISOString(),
+              practical_hours_used: 0,
+              theoretical_classes_used: 0,
+              simulations_used: 0,
+            });
+        }
 
         // Enviar notificação por email ao admin
         const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
